@@ -157,3 +157,4 @@ dev-debug.log
 
 # Cursor IDE configuration (contains API keys)
 .cursor/
+.cursor/mcp.json
