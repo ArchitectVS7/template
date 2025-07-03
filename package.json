@@ -6,7 +6,8 @@
   "type": "module",
   "workspaces": [
     "frontend",
-    "backend"
+    "backend",
+    "prisma"
   ],
   "engines": {
     "node": ">=18.0.0",
@@ -41,7 +42,8 @@
     "db:seed": "cd backend && npm run db:seed",
     "db:studio": "cd backend && npm run db:studio",
     "setup": "npm run install:all && npm run db:migrate && npm run db:seed",
-    "verify": "npm run type-check && npm run lint && npm run test"
+    "verify": "npm run type-check && npm run lint && npm run test",
+    "prepare": "husky install"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
@@ -54,7 +56,9 @@
     "eslint-plugin-prettier": "^5.1.3",
     "globals": "^15.0.0",
     "prettier": "^3.2.5",
-    "typescript": "^5.4.0"
+    "typescript": "^5.4.0",
+    "husky": "^8.0.0",
+    "lint-staged": "^15.0.0"
   },
   "keywords": [
     "typescript",
@@ -65,5 +69,8 @@
     "fullstack"
   ],
   "author": "Your Name",
-  "license": "MIT"
+  "license": "MIT",
+  "lint-staged": {
+    "*.{js,ts,tsx}": ["eslint --fix", "prettier --write"]
+  }
 }

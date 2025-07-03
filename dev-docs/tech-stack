@@ -1,0 +1,161 @@
+# Recommended Tech Stack
+
+## Stack Overview
+
+### Frontend
+- **Framework**: React 18+ with TypeScript
+- **Build Tool**: Vite
+- **Styling**: Tailwind CSS + shadcn/ui
+- **State Management**: TanStack Query for server state
+- **Form Handling**: React Hook Form + Zod validation
+- **Deployment**: Render Static Site
+
+### Backend
+- **Runtime**: Node.js 20+ with TypeScript
+- **Framework**: Express.js
+- **ORM**: Prisma
+- **Database**: Render PostgreSQL
+- **API**: REST with Zod validation
+- **Authentication**: JWT with bcryptjs
+- **Deployment**: Render Web Service
+
+### Development Tools
+- **Package Manager**: npm/pnpm
+- **Testing**: Vitest (unit/integration), Playwright (E2E)
+- **Code Quality**: ESLint, Prettier, pre-commit hooks
+- **Error Tracking**: Sentry (optional)
+
+## Project Structure
+
+```
+your-app/
+├── frontend/          # Deploy as Static Site
+│   ├── package.json
+│   └── vite.config.ts
+├── backend/           # Deploy as Web Service  
+│   ├── package.json
+│   └── tsconfig.json
+├── prisma/
+│   └── schema.prisma
+└── render.yaml        # Infrastructure as Code
+```
+
+## Render-Specific Configuration
+
+### Environment Variables
+```javascript
+// Backend configuration
+const DATABASE_URL = process.env.DATABASE_URL; // Automatically set by Render
+const PORT = process.env.PORT || 3000; // Render assigns the port
+```
+
+### Database Connection
+```prisma
+// prisma/schema.prisma
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+  directUrl = env("DATABASE_URL_UNPOOLED") // For connection pooling
+}
+```
+
+### Build Scripts
+```json
+// backend/package.json
+{
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx watch src/index.ts"
+  }
+}
+```
+
+## Infrastructure Configuration
+
+### render.yaml
+```yaml
+databases:
+  - name: myapp-db
+    plan: free
+    databaseName: myapp
+    user: myapp
+
+services:
+  - type: web
+    name: myapp-api
+    env: node
+    plan: free
+    buildCommand: cd backend && npm install && npm run build
+    startCommand: cd backend && npm start
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: myapp-db
+          property: connectionString
+      - key: JWT_SECRET
+        generateValue: true
+
+  - type: web
+    name: myapp-frontend
+    env: static
+    plan: free
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: frontend/dist
+    envVars:
+      - key: VITE_API_URL
+        value: https://myapp-api.onrender.com
+```
+
+## Key Features
+
+### Authentication
+- JWT-based authentication
+- Session storage in PostgreSQL
+- Secure password hashing with bcryptjs
+
+### API Design
+- RESTful endpoints
+- Zod schema validation
+- Structured error handling
+- Health check endpoints
+
+### Database
+- PostgreSQL with Prisma ORM
+- Automated migrations
+- Connection pooling support
+- Render's automated backups
+
+### Development Experience
+- Full TypeScript support
+- Hot module replacement
+- Integrated testing suite
+- CI/CD with Render preview environments
+
+## Performance Standards
+- Page load time: < 2 seconds
+- API response time: < 500ms
+- 99.9% uptime target
+
+## Security Standards
+- HTTPS enforced
+- Input validation on all endpoints
+- Rate limiting
+- Secure session management
+- Environment variable management
+
+## Versioning Convention
+- **0.1-0.3**: Requirements & Design
+- **0.4-0.6**: Development & Prototyping
+- **0.7.x**: Internal Testing
+- **0.8.x**: Alpha Testing
+- **0.9.x**: Beta Testing
+- **1.0+**: Production Release
+
+## Additional Best Practices
+- Mobile-responsive design
+- Accessibility (WCAG 2.1 AA)
+- Comprehensive error boundaries
+- API versioning strategy
+- Structured logging
+- Performance monitoring
