@@ -4,12 +4,11 @@ import app from '../src/index.js';
 
 describe('Backend API', () => {
   it('should respond to health check', async () => {
-    const response = await request(app).get('/health').expect(200);
+    const response = await request(app).get('/api/health').expect(200);
 
     expect(response.body).toEqual({
       status: 'ok',
       timestamp: expect.any(String),
-      environment: expect.any(String),
     });
   });
 

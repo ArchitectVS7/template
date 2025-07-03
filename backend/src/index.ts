@@ -16,12 +16,11 @@ app.use(cors());
 app.use(morgan('combined'));
 app.use(express.json());
 
-// Basic route
-app.get('/health', (_req, res) => {
+// Health check endpoint
+app.get('/api/health', (_req, res) => {
   res.json({
     status: 'ok',
     timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development',
   });
 });
 
