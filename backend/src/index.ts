@@ -2,18 +2,18 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import dotenv from 'dotenv';
 import { initializeDatabase, disconnectDatabase, checkDatabaseHealth } from './lib/database.js';
-
-// Load environment variables
-dotenv.config();
+import { env, getConfigSummary } from './lib/env.js';
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = env.PORT;
 
 // Middleware
 app.use(helmet());
-app.use(cors());
+app.use(cors({
+  origin: env.FRONTEND_URL,
+  credentials: true,
+}));
 app.use(morgan('combined'));
 app.use(express.json());
 
@@ -74,7 +74,7 @@ app.use(
     console.error(err.stack);
     res.status(500).json({
       message: 'Something went wrong!',
-      error: process.env.NODE_ENV === 'development' ? err.message : undefined,
+      error: env.NODE_ENV === 'development' ? err.message : undefined,
     });
   }
 );
@@ -84,10 +84,14 @@ app.use((_req, res) => {
   res.status(404).json({ message: 'Route not found' });
 });
 
-if (process.env.NODE_ENV !== 'test') {
+if (env.NODE_ENV !== 'test') {
   const server = app.listen(PORT, async () => {
     console.log(`🚀 Server running on port ${PORT}`);
-    console.log(`📍 Environment: ${process.env.NODE_ENV || 'development'}`);
+    console.log(`📍 Environment: ${env.NODE_ENV}`);
+    
+    // Log configuration summary
+    const configSummary = getConfigSummary();
+    console.log('⚙️  Configuration:', configSummary);
     
     // Initialize database connection
     try {
