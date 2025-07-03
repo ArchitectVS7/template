@@ -96,4 +96,6 @@ jobs:
         echo "Checking for basic files..."
         [ -f "README.md" ] && echo "✅ README.md found" || echo "❌ README.md missing"
         [ -f ".gitignore" ] && echo "✅ .gitignore found" || echo "❌ .gitignore missing"
+
         [ -f ".gitattributes" ] && echo "✅ .gitattributes found" || echo "❌ .gitattributes missing"
+
