@@ -8,7 +8,7 @@
     "esModuleInterop": true,
     "strict": true,
     "skipLibCheck": true,
-    "noEmit": false,
+    "noEmit": true,
     "composite": true,
     "resolveJsonModule": true,
     "allowImportingTsExtensions": true,
