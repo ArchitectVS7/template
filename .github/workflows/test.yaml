@@ -1,5 +1,5 @@
-# Create simple workflow file
-@"
+# Method 1: Here-string with proper syntax
+$content = @'
 name: Simple Test
 
 on:
@@ -15,5 +15,11 @@ jobs:
     - uses: actions/checkout@v4
     - name: Simple check
       run: echo "Test passed!"
-"@ | Out-File -FilePath .github\workflows\test.yml -Encoding UTF8
+'@
 
+$content | Out-File -FilePath .github\workflows\test.yml -Encoding UTF8
+
+# Method 2: Create file manually in VS Code/Cursor
+# - Create file through IDE
+# - Copy/paste clean YAML
+# - Save and commit
