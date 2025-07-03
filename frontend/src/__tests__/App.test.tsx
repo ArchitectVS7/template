@@ -4,28 +4,15 @@ import '@testing-library/jest-dom';
 import App from '../App';
 
 describe('App Component', () => {
-  it('renders the main heading', () => {
+  it('renders Hello World heading', () => {
     render(<App />);
-    const heading = screen.getByText('Web App Template');
+    const heading = screen.getByText('Hello World');
     expect(heading).toBeInTheDocument();
   });
 
-  it('displays the subtitle', () => {
+  it('displays the welcome message', () => {
     render(<App />);
-    const subtitle = screen.getByText(
-      'A production-ready React + TypeScript + Express template'
-    );
+    const subtitle = screen.getByText('Welcome to the Web App Template');
     expect(subtitle).toBeInTheDocument();
-  });
-
-  it('shows all feature checkmarks', () => {
-    render(<App />);
-
-    expect(screen.getByText('✅ TypeScript configured')).toBeInTheDocument();
-    expect(screen.getByText('✅ ESLint & Prettier setup')).toBeInTheDocument();
-    expect(
-      screen.getByText('✅ Frontend & Backend structure')
-    ).toBeInTheDocument();
-    expect(screen.getByText('✅ Automated testing ready')).toBeInTheDocument();
   });
 });

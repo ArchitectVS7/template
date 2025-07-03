@@ -61,7 +61,5 @@
     "test-results",
     "playwright-report"
   ],
-  "references": [
-    { "path": "./tsconfig.node.json" }
-  ]
+
 }
