@@ -1,0 +1,232 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+  SUPERADMIN
+}
+
+enum SystemStatus {
+  OPERATIONAL
+  WARNING
+  CRITICAL
+}
+
+enum ConversationStatus {
+  ACTIVE
+  ARCHIVED
+  DELETED
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  username  String   @unique
+  firstName String?
+  lastName  String?
+  role      UserRole @default(USER)
+  password  String
+  avatar    String?
+  isActive  Boolean  @default(true)
+  
+  // Authentication
+  emailVerified DateTime?
+  resetToken    String?
+  resetTokenExpires DateTime?
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  lastLogin DateTime?
+  
+  // Relations
+  sessions      Session[]
+  preferences   UserPreferences?
+  conversations Conversation[]
+  debugLogs     DebugLog[]
+  
+  @@map("users")
+}
+
+model UserPreferences {
+  id     String @id @default(cuid())
+  userId String @unique
+  
+  // UI Preferences
+  theme           String  @default("light") // light, dark, system
+  language        String  @default("en")
+  timezone        String  @default("UTC")
+  notifications   Boolean @default(true)
+  
+  // LLM Preferences
+  defaultModel    String  @default("claude-3-haiku")
+  maxTokens       Int     @default(1000)
+  temperature     Float   @default(0.7)
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("user_preferences")
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  userId       String
+  accessToken  String   @unique
+  refreshToken String   @unique
+  expiresAt    DateTime
+  ipAddress    String?
+  userAgent    String?
+  isActive     Boolean  @default(true)
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("sessions")
+}
+
+model Configuration {
+  id          String  @id @default(cuid())
+  key         String  @unique
+  value       String
+  description String?
+  category    String  @default("general")
+  isPublic    Boolean @default(false)
+  
+  // Configuration metadata
+  dataType    String  @default("string") // string, number, boolean, json
+  validation  String? // JSON schema or regex for validation
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("configurations")
+}
+
+model Conversation {
+  id       String             @id @default(cuid())
+  userId   String
+  title    String
+  status   ConversationStatus @default(ACTIVE)
+  
+  // LLM Configuration
+  model       String  @default("claude-3-haiku")
+  maxTokens   Int     @default(1000)
+  temperature Float   @default(0.7)
+  
+  // Usage tracking
+  totalTokens Int @default(0)
+  totalCost   Float @default(0.0)
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  // Relations
+  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  messages Message[]
+  
+  @@map("conversations")
+}
+
+model Message {
+  id             String @id @default(cuid())
+  conversationId String
+  role           String // "user", "assistant", "system"
+  content        String
+  
+  // Token usage for this message
+  inputTokens  Int?
+  outputTokens Int?
+  cost         Float?
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  
+  // Relations
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  
+  @@map("messages")
+}
+
+model SystemHealth {
+  id        String       @id @default(cuid())
+  component String       // "database", "api", "external_service", etc.
+  status    SystemStatus @default(OPERATIONAL)
+  message   String?
+  details   Json?        // Additional structured data
+  
+  // Metrics
+  responseTime Int? // in milliseconds
+  uptime       Float? // percentage
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("system_health")
+}
+
+model DebugLog {
+  id       String @id @default(cuid())
+  userId   String?
+  level    String // "info", "warn", "error", "debug"
+  message  String
+  context  Json?  // Additional structured context
+  
+  // Request context
+  method     String?
+  url        String?
+  statusCode Int?
+  duration   Int? // in milliseconds
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  
+  // Relations
+  user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  
+  @@map("debug_logs")
+}
+
+model ApiKey {
+  id          String  @id @default(cuid())
+  name        String
+  provider    String  // "anthropic", "openai", "perplexity", etc.
+  keyHash     String  // Encrypted/hashed API key
+  isActive    Boolean @default(true)
+  
+  // Usage tracking
+  requestCount Int   @default(0)
+  lastUsed     DateTime?
+  
+  // Rate limiting
+  rateLimit     Int? // requests per hour
+  rateLimitUsed Int  @default(0)
+  rateLimitReset DateTime?
+  
+  // Timestamps
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  
+  @@map("api_keys")
+}
