@@ -2,14 +2,16 @@ import { PrismaClient } from '@prisma/client';
 
 // Singleton pattern for Prisma client to prevent multiple instances
 declare global {
-  // eslint-disable-next-line no-var
   var __prisma: PrismaClient | undefined;
 }
 
 // Database connection configuration
 const createPrismaClient = () => {
   return new PrismaClient({
-    log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
+    log:
+      process.env.NODE_ENV === 'development'
+        ? ['query', 'error', 'warn']
+        : ['error'],
     datasources: {
       db: {
         url: process.env.DATABASE_URL,
@@ -31,11 +33,11 @@ export const initializeDatabase = async () => {
     // Test database connection
     await prisma.$connect();
     console.log('🗄️  Database connected successfully');
-    
+
     // Health check query
     await prisma.$queryRaw`SELECT 1`;
     console.log('✅ Database health check passed');
-    
+
     return true;
   } catch (error) {
     console.error('❌ Database connection failed:', error);
@@ -59,7 +61,7 @@ export const checkDatabaseHealth = async () => {
     const start = Date.now();
     await prisma.$queryRaw`SELECT 1`;
     const duration = Date.now() - start;
-    
+
     return {
       status: 'healthy',
       responseTime: duration,

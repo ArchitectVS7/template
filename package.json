@@ -71,6 +71,9 @@
   "author": "Your Name",
   "license": "MIT",
   "lint-staged": {
-    "*.{js,ts,tsx}": ["eslint --fix", "prettier --write"]
+    "*.{js,ts,tsx}": [
+      "eslint --fix",
+      "prettier --write"
+    ]
   }
 }

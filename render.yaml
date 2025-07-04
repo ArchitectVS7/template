@@ -89,7 +89,7 @@ services:
   # Cron Jobs
   - type: cron
     name: cleanup-sessions
-    schedule: "0 2 * * *"  # Daily at 2 AM
+    schedule: '0 2 * * *' # Daily at 2 AM
     buildCommand: cd backend && npm ci && npm run build
     startCommand: cd backend && node dist/scripts/cleanup-sessions.js
     envVars:
@@ -102,7 +102,7 @@ services:
 
   - type: cron
     name: health-check-monitor
-    schedule: "*/5 * * * *"  # Every 5 minutes
+    schedule: '*/5 * * * *' # Every 5 minutes
     buildCommand: cd backend && npm ci && npm run build
     startCommand: cd backend && node dist/scripts/health-monitor.js
     envVars:

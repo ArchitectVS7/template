@@ -4,9 +4,8 @@ Great question! No, we don't need to refactor the entire task list for PowerShel
 
 ### **Phase 0: Foundation (Week 1) - 8-12 hours**
 
-
-
 #### **Day 2: Database Foundation (2-3 hours)**
+
 ```powershell
 # 1. Set up Prisma in backend directory
 cd backend
@@ -25,11 +24,12 @@ cd ..
 **Deliverable**: Database connection working, User table created
 
 #### **Day 3: Basic API Structure (2-3 hours)**
+
 ```typescript
 # Same TypeScript code - no changes needed
 // Create basic API structure
 - /api/health (GET)
-- /api/auth/register (POST) 
+- /api/auth/register (POST)
 - /api/auth/login (POST)
 - Basic middleware (CORS, logging, error handling)
 ```
@@ -37,6 +37,7 @@ cd ..
 **Deliverable**: Health endpoint returns 200, basic auth endpoints exist
 
 #### **Day 4: Frontend Foundation (2-3 hours)**
+
 ```powershell
 # 1. Set up React + Vite (PowerShell syntax)
 cd frontend
@@ -55,6 +56,7 @@ cd ..
 ## **Key PowerShell Adaptations**
 
 ### **1. Directory Navigation**
+
 ```powershell
 # Instead of: cd frontend && npm init -y
 # Use:
@@ -64,6 +66,7 @@ cd ..
 ```
 
 ### **2. Command Chaining**
+
 ```powershell
 # Instead of: mkdir frontend backend prisma
 # Use:
@@ -77,6 +80,7 @@ cd ..
 ```
 
 ### **3. Environment Variables**
+
 ```powershell
 # Instead of: export NODE_ENV=development
 # Use:
@@ -87,6 +91,7 @@ $env:NODE_ENV = "development"
 ```
 
 ### **4. File Operations**
+
 ```powershell
 # Instead of: touch .env
 # Use:
@@ -102,6 +107,7 @@ Copy-Item .env.example .env
 ## **Updated Daily Development Flow**
 
 ### **Start Development (PowerShell)**
+
 ```powershell
 # Start backend server
 cd backend
@@ -114,6 +120,7 @@ npm run dev
 ```
 
 ### **Database Operations (PowerShell)**
+
 ```powershell
 # Database GUI
 cd backend
@@ -129,6 +136,7 @@ npx prisma generate
 ```
 
 ### **Testing (PowerShell)**
+
 ```powershell
 # Run tests
 cd backend
@@ -148,11 +156,13 @@ npm run build
 ## **PowerShell-Specific Tips**
 
 ### **1. Use PowerShell ISE or VS Code**
+
 - Better syntax highlighting for PowerShell
 - Integrated terminal support
 - Debugging capabilities
 
 ### **2. Profile Setup (Optional)**
+
 ```powershell
 # Create PowerShell profile for shortcuts
 if (!(Test-Path -Path $PROFILE)) {
@@ -164,6 +174,7 @@ notepad $PROFILE
 ```
 
 ### **3. Useful PowerShell Aliases**
+
 ```powershell
 # Common aliases that work like bash
 ls          # Same as dir
@@ -182,25 +193,25 @@ mkdir       # Same as New-Item -ItemType Directory
 ✅ **All React/Vite configuration** - No changes needed  
 ✅ **All API endpoints** - Same implementation  
 ✅ **All database schemas** - Same Prisma schema  
-✅ **All UI components** - Same React components  
+✅ **All UI components** - Same React components
 
 ## **What Changes**
 
 🔄 **Directory navigation syntax** - Use `cd` with separate commands  
 �� **Command chaining** - Use semicolons or separate commands  
 🔄 **Environment variables** - Use `$env:` prefix  
-🔄 **File operations** - Use PowerShell cmdlets  
+🔄 **File operations** - Use PowerShell cmdlets
 
 ---
 
 ## **Quick Reference: PowerShell vs Bash**
 
-| Task | Bash | PowerShell |
-|------|------|------------|
-| Create directories | `mkdir frontend backend prisma` | `mkdir frontend, backend, prisma` |
-| Navigate & run | `cd frontend && npm init -y` | `cd frontend; npm init -y` |
-| Environment var | `export NODE_ENV=dev` | `$env:NODE_ENV = "dev"` |
-| Create file | `touch .env` | `New-Item -ItemType File -Name ".env"` |
-| Copy file | `cp .env.example .env` | `Copy-Item .env.example .env` |
+| Task               | Bash                            | PowerShell                             |
+| ------------------ | ------------------------------- | -------------------------------------- |
+| Create directories | `mkdir frontend backend prisma` | `mkdir frontend, backend, prisma`      |
+| Navigate & run     | `cd frontend && npm init -y`    | `cd frontend; npm init -y`             |
+| Environment var    | `export NODE_ENV=dev`           | `$env:NODE_ENV = "dev"`                |
+| Create file        | `touch .env`                    | `New-Item -ItemType File -Name ".env"` |
+| Copy file          | `cp .env.example .env`          | `Copy-Item .env.example .env`          |
 
 The development plan, architecture, and all the actual code remain exactly the same - only the shell commands need this minor syntax adjustment!

@@ -8,50 +8,62 @@
 
 **Core Value**: [Complete, tested, production-ready foundation that includes advanced features like real-time debug monitoring and AI integration that would typically take months to implement properly.]
 
-# Core Features  
+# Core Features
+
 [
+
 ## 1. Complete Authentication System
+
 **What it does**: Provides secure user registration, login, profile management, and role-based access control with JWT authentication and session management.
 **Why it's important**: Essential foundation for any multi-user application. Protects sensitive data, enables personalized experiences, and provides admin functionality with enterprise-grade security standards.
 **How it works**: Users register with email/password (securely hashed with bcryptjs). JWT tokens with refresh capabilities handle sessions. Role-based permissions (USER/ADMIN/SUPERADMIN) control feature access. All sessions tracked in database for security monitoring.
 
 ## 2. Debug Terminal with Traffic Light Monitoring
+
 **What it does**: Real-time operational dashboard showing system health with color-coded status indicators (Green/Yellow/Red) and comprehensive activity logging for all user actions, API calls, and system events.
 **Why it's important**: Dramatically reduces debugging time by providing instant visibility into system state. Enables proactive issue detection and provides audit trails for compliance. Most applications lack this level of operational insight.
 **How it works**: Background services monitor database connections, API endpoints, and external dependencies. All events logged with timestamps and metadata. Admin interface displays real-time status indicators and searchable, filterable activity logs.
 
 ## 3. Native LLM (Claude) Integration
+
 **What it does**: Built-in Claude AI support providing chat interfaces, conversation management, prompt templates, and usage tracking throughout the application.
 **Why it's important**: Enables AI-powered features without complex third-party integrations. Future-proofs applications for AI-enhanced workflows and reduces development time for AI features.
 **How it works**: Backend service manages Claude API connections with rate limiting and cost tracking. Frontend provides chat interfaces and conversation history. All conversations stored with user associations for persistent AI interactions.
 
 ## 4. Dual Configuration Management
+
 **What it does**: Users can save/load application settings through both database storage and portable text-based configurations, enabling backup, sharing, and migration of preferences.
 **Why it's important**: Provides data portability across environments, enables configuration backup/disaster recovery, and supports team standardization and air-gapped systems.
 **How it works**: User preferences stored in database for normal operation. "Export" function compresses configuration data into checksummed JSON string. "Import" validates and applies configurations with error checking.
 
 ## 5. Modern UI Component Library
+
 **What it does**: Complete set of responsive, accessible UI components built on Tailwind CSS and shadcn/ui, including forms, data displays, navigation, and layout structures.
 **Why it's important**: Ensures consistent user experience, accelerates development with pre-built components, provides professional appearance, and maintains accessibility compliance (WCAG 2.1 AA).
 **How it works**: React + TypeScript components with Tailwind styling. Each component includes accessibility attributes, responsive design, and consistent theming. Form components integrate with React Hook Form and Zod validation.
 
 ## 6. One-Click Deployment Infrastructure
+
 **What it does**: Complete deployment configuration using Render platform with infrastructure-as-code (render.yaml), automated database provisioning, and environment management.
 **Why it's important**: Eliminates complex DevOps setup for rapid deployment. Provides consistent environments and reduces deployment errors through automation.
 **How it works**: Single render.yaml file defines entire infrastructure including database, backend service, and frontend static site. Environment variables automatically managed with deployment triggers on git commits.
 ]
 
-# User Experience  
+# User Experience
+
 [
+
 ## User Personas
 
 **Primary: Mid-Level Developer**
+
 - 2-4 years development experience
 - Familiar with React/Node.js but new to full-stack architecture
 - Goals: Deploy professional web application within days, learn modern practices, build portfolio projects
 - Pain Points: Overwhelmed by technology choices, struggles with auth/security setup, debugging production issues takes too long
 
 **Secondary: Startup Technical Founder**
+
 - 5+ years experience but wearing multiple hats
 - Goals: Launch MVP in 2-4 weeks, minimize technical debt while moving fast, reduce operational overhead
 - Pain Points: Limited time for tech research, needs features like user management out-of-box, concerned about security from day one
@@ -59,16 +71,19 @@
 ## Key User Flows
 
 **1. Initial Setup & First Deploy**
+
 - Download template → Environment setup → Customization → First deployment
 - Success Metrics: < 2 hours from download to deployed app, all traffic lights green, successful user registration
 - UX Considerations: Step-by-step documentation, helpful error messages, progress indicators, quick wins early
 
 **2. Feature Development Workflow**
+
 - Planning → Development → AI Integration → Testing & Debug → Deployment
 - Success Metrics: New features follow patterns, tests pass, debug terminal shows healthy status
 - UX Considerations: Code generation prompts, clear examples, comprehensive logging, testing framework
 
 **3. Production Monitoring & Maintenance**
+
 - Daily health check → Issue investigation → Performance optimization → Team coordination
 - Success Metrics: Issues identified before user reports, decreased resolution time, team independence
 - UX Considerations: Admin interface without information overload, intuitive filtering, actionable insights
@@ -76,24 +91,27 @@
 ## UI/UX Design Principles
 
 **Modern Professional Aesthetic**
+
 - Clean, minimalist interface using Tailwind CSS design tokens
 - Consistent spacing, typography, and color schemes
 - Dark/light theme support with user preference persistence
 - Responsive design across all devices
 
 **Information Architecture**
+
 - Clear navigation hierarchy with breadcrumbs
 - Contextual sidebar navigation adapting to user role
 - Dashboard layout prioritizing most important information
 - Logical grouping of related features and settings
 
 **Accessibility & Performance**
+
 - WCAG 2.1 AA compliance with proper contrast ratios
 - Keyboard navigation support for all interactive elements
 - Fast page load times (< 2 seconds) with optimized assets
 - Smooth animations using CSS transforms
-]
-</context>
+  ]
+  </context>
 
 <PRD>
 # Technical Architecture  
@@ -101,6 +119,7 @@
 ## System Components
 
 **Frontend Layer (React 18 + TypeScript + Vite)**
+
 - Presentation Components: shadcn/ui library, authentication forms, debug terminal dashboard, LLM chat interface, configuration management UI
 - State Management: TanStack Query (server state), React Context (auth state), Local Storage (user preferences)
 - Form Handling: React Hook Form + Zod validation for all user inputs
@@ -108,6 +127,7 @@
 - Development Tools: Vite dev server, hot module replacement, TypeScript compiler, Tailwind CSS processing
 
 **Backend Layer (Node.js 20+ + Express + TypeScript)**
+
 - API Gateway: Express.js HTTP server, CORS middleware, rate limiting, request/response logging
 - API Design: REST endpoints with Zod schema validation for all inputs and outputs
 - Authentication: JWT token management, bcryptjs password hashing, role-based access control, session management
@@ -116,6 +136,7 @@
 - External Integrations: Claude API client, email service (optional)
 
 **Debug Terminal System**
+
 - Data Collection: API request/response interceptor, database query logger, user action tracker, error boundary collector, system health monitor
 - Processing: Event aggregation service, status calculation engine, log filtering & search, real-time event streaming
 - Storage: Debug log database tables, service status cache, event stream buffer, historical metrics store
@@ -133,12 +154,12 @@ model User {
   verified      Boolean           @default(false)
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
-  
+
   sessions      Session[]
   preferences   UserPreferences?
   conversations LLMConversation[]
   debugLogs     DebugLog[]
-  
+
   @@map("users")
 }
 
@@ -150,7 +171,7 @@ model Session {
   userAgent String?
   ipAddress String?
   createdAt DateTime @default(now())
-  
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   @@map("sessions")
 }
@@ -175,7 +196,7 @@ model UserPreferences {
   notifications Json    @default("{}")
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
-  
+
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   @@map("user_preferences")
 }
@@ -189,10 +210,10 @@ model LLMConversation {
   settings  Json         @default("{}")
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
-  
+
   user     User         @relation(fields: [userId], references: [id], onDelete: Cascade)
   messages LLMMessage[]
-  
+
   @@index([userId, createdAt])
   @@map("llm_conversations")
 }
@@ -204,9 +225,9 @@ model LLMMessage {
   content        String   @db.Text
   tokens         Int?
   timestamp      DateTime @default(now())
-  
+
   conversation LLMConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
-  
+
   @@index([conversationId, timestamp])
   @@map("llm_messages")
 }
@@ -224,9 +245,9 @@ model DebugLog {
   sessionId String?
   requestId String?
   duration  Int?     // Milliseconds
-  
+
   user User? @relation(fields: [userId], references: [id], onDelete: SetNull)
-  
+
   @@index([timestamp, type])
   @@index([userId, timestamp])
   @@index([level, timestamp])
@@ -241,7 +262,7 @@ model ServiceStatus {
   responseTime Int?     // Milliseconds
   errorMessage String?
   metadata     Json?
-  
+
   @@map("service_status")
 }
 ```
@@ -249,11 +270,12 @@ model ServiceStatus {
 ## APIs and Integrations
 
 **Authentication API**
+
 ```typescript
-POST /api/auth/register | login | logout | refresh
-GET  /api/auth/me
-PUT  /api/auth/profile
-POST /api/auth/forgot-password | reset-password | verify-email
+(POST / api / auth / register) | login | logout | refresh;
+GET / api / auth / me;
+PUT / api / auth / profile;
+(POST / api / auth / forgot - password) | (reset - password) | (verify - email);
 
 interface LoginRequest {
   email: string;
@@ -270,15 +292,17 @@ interface LoginResponse {
 ```
 
 **User Management & Configuration API**
+
 ```typescript
 GET  /api/preferences
-PUT  /api/preferences  
+PUT  /api/preferences
 POST /api/preferences/reset
 POST /api/config/export | import
 GET  /api/config/backups
 ```
 
 **LLM Integration API**
+
 ```typescript
 POST /api/llm/chat
 GET  /api/llm/conversations
@@ -297,6 +321,7 @@ interface LLMChatRequest {
 ```
 
 **Debug Terminal API**
+
 ```typescript
 GET  /api/debug/status | health | logs
 POST /api/debug/logs
@@ -314,6 +339,7 @@ interface SystemHealthResponse {
 ## Infrastructure Requirements
 
 **Development Environment**
+
 - Node.js >= 20.0.0, npm >= 10.0.0 (or pnpm >= 8.0.0), TypeScript >= 5.0.0
 - PostgreSQL >= 14.0 with uuid-ossp extension
 - Vite >= 5.0.0, Prisma >= 5.0.0
@@ -322,6 +348,7 @@ interface SystemHealthResponse {
 - Error Tracking: Sentry (optional)
 
 **Production Infrastructure (Render Platform)**
+
 ```yaml
 # render.yaml
 databases:
@@ -356,12 +383,17 @@ services:
       - key: VITE_API_URL
         fromService: { name: webapp-api, property: host }
 ```
+
 ]
 
-# Development Roadmap  
+# Development Roadmap
+
 [
+
 ## Phase 0: Foundation Infrastructure
+
 **Scope**: Core project structure and deployment pipeline
+
 - Initialize monorepo structure (frontend/, backend/, prisma/)
 - Configure TypeScript, Vite, ESLint, Prettier across projects
 - Set up basic Express server with TypeScript compilation
@@ -374,7 +406,9 @@ services:
 **Deliverable**: Complete project scaffolding with working deployment to Render
 
 ## Phase 1: Authentication Foundation
+
 **Scope**: Secure user system enabling all subsequent features
+
 - Implement JWT token generation with bcryptjs password hashing
 - Build user registration/login endpoints with validation
 - Create password reset and email verification functionality
@@ -387,7 +421,9 @@ services:
 **Deliverable**: Complete authentication system with working UI
 
 ## Phase 2: Modern UI Foundation
+
 **Scope**: Professional component library and responsive design
+
 - Install and configure shadcn/ui component system
 - Set up Tailwind CSS with custom design tokens and dark/light themes
 - Build main application shell (header, sidebar, footer)
@@ -400,7 +436,9 @@ services:
 **Deliverable**: Professional-looking application with complete UI system
 
 ## Phase 3: Debug Terminal Core System
+
 **Scope**: Innovative monitoring and debugging infrastructure
+
 - Build service health check framework for database, API, and external services
 - Create real-time status indicator components with traffic light visualization
 - Build comprehensive event logging middleware for user actions and API calls
@@ -413,7 +451,9 @@ services:
 **Deliverable**: Complete debug terminal with real-time monitoring
 
 ## Phase 4: LLM Integration Foundation
+
 **Scope**: AI-powered features with conversation management
+
 - Build Claude API client service with authentication and error handling
 - Implement token counting, cost tracking, and rate limiting
 - Create modern chat UI with message bubbles and typing indicators
@@ -426,7 +466,9 @@ services:
 **Deliverable**: Complete LLM integration with chat interface
 
 ## Phase 5: Configuration Management System
+
 **Scope**: Dual persistence with import/export capabilities
+
 - Design comprehensive user preferences database model
 - Build preference creation, update, and retrieval endpoints with validation
 - Create comprehensive settings interface for theme, language, and LLM configuration
@@ -439,7 +481,9 @@ services:
 **Deliverable**: Complete configuration management with dual persistence
 
 ## Phase 6: Enhanced Debug Terminal
+
 **Scope**: Advanced monitoring, analytics, and operational insights
+
 - Implement advanced user interaction tracking and API performance monitoring
 - Build log aggregation, pattern detection, and correlation systems
 - Create detailed response time analysis and throughput monitoring
@@ -452,7 +496,9 @@ services:
 **Deliverable**: Production-ready debug terminal with advanced analytics
 
 ## Phase 7: Advanced Authentication & Security
+
 **Scope**: Enterprise-grade security and user management
+
 - Implement multi-factor authentication with TOTP and SMS verification
 - Build advanced session monitoring with concurrent session limits
 - Create suspicious activity detection and IP-based access controls
@@ -465,7 +511,9 @@ services:
 **Deliverable**: Enterprise-grade security and user management system
 
 ## Phase 8: Advanced LLM Features
+
 **Scope**: Sophisticated AI capabilities and workflow automation
+
 - Implement support for multiple Claude model variants with performance comparison
 - Build conversation branching, version control, and collaboration features
 - Create comprehensive prompt template library with testing tools
@@ -478,7 +526,9 @@ services:
 **Deliverable**: Advanced AI capabilities with workflow automation
 
 ## Phase 9: Production Optimization
+
 **Scope**: Final optimization and production readiness
+
 - Build comprehensive testing framework (unit, integration, E2E)
 - Implement database query optimization and frontend bundle optimization
 - Create caching strategies and CDN optimization for asset delivery
@@ -492,16 +542,20 @@ services:
 ]
 
 # Logical Dependency Chain
+
 [
+
 ## Foundation Dependencies (Critical Path)
 
 **1. Project Infrastructure (Week 1)**
+
 - Project structure → TypeScript configuration → Basic Express server → Database schema
 - **Why First**: Everything depends on having a working development environment
 - **Deliverable**: `npm run dev` works for both frontend and backend
 - **Success Criteria**: Hot reload working, database connects, health check returns 200
 
 **2. Authentication Core (Week 1-2)**
+
 - Database User model → JWT implementation → Login/Register API → Basic auth middleware
 - **Dependencies**: Project infrastructure must be complete
 - **Why Critical**: All subsequent features require user context and protected routes
@@ -509,6 +563,7 @@ services:
 - **Success Criteria**: User can register, login, and access protected endpoints
 
 **3. Basic UI Shell (Week 2)**
+
 - shadcn/ui setup → Layout components → Navigation → Auth forms
 - **Dependencies**: Auth API must exist for login/register forms
 - **Why Critical**: Need visible interface to demonstrate progress and test features
@@ -518,13 +573,15 @@ services:
 ## Feature Development Dependencies (Parallel Development Possible)
 
 **4. Debug Terminal Foundation (Week 3)**
+
 - Health check service → Status indicators → Basic event logging → Log viewer
 - **Dependencies**: Auth system (for admin access), UI shell (for display)
 - **Why This Order**: Health monitoring is foundational for all other services
 - **Deliverable**: Basic system health monitoring with traffic light indicators
 - **Success Criteria**: Admin can view system status and basic activity logs
 
-**5. LLM Integration (Week 3-4)**  
+**5. LLM Integration (Week 3-4)**
+
 - Claude API client → Chat API endpoints → Chat UI components → Conversation management
 - **Dependencies**: Auth system (for user context), UI shell (for chat interface)
 - **Can Parallel With**: Debug terminal development
@@ -532,6 +589,7 @@ services:
 - **Success Criteria**: Users can chat with Claude and conversations are saved
 
 **6. Configuration System (Week 4)**
+
 - User preferences schema → Preferences API → Settings UI → Export/Import functionality
 - **Dependencies**: Auth system, basic UI components
 - **Can Parallel With**: Debug terminal and LLM development
@@ -541,18 +599,21 @@ services:
 ## Enhancement Dependencies (Build Upon Core)
 
 **7. Advanced Debug Features (Week 5)**
+
 - Enhanced event collection → Advanced filtering → Performance analytics → Operational dashboard
 - **Dependencies**: Debug terminal foundation must be working
 - **Build Upon**: Basic logging and health checks
 - **Deliverable**: Production-ready monitoring with advanced analytics
 
 **8. Advanced LLM Features (Week 5-6)**
+
 - Multi-model support → Conversation branching → Prompt templates → Usage analytics
 - **Dependencies**: Basic LLM integration must be working
 - **Build Upon**: Simple chat interface and conversation management
 - **Deliverable**: Sophisticated AI capabilities with workflow integration
 
 **9. Security & Production Hardening (Week 6-7)**
+
 - Advanced auth features → Security monitoring → Performance optimization → Testing framework
 - **Dependencies**: All core features must be implemented
 - **Build Upon**: Basic auth, debug monitoring, and all existing features
@@ -561,6 +622,7 @@ services:
 ## Pacing Strategy for Atomic Development
 
 **Quick Wins Approach**
+
 - Hour 1: Basic project structure working
 - Hour 2: Database connection and first API endpoint
 - Hour 4: User can register and login through UI
@@ -572,6 +634,7 @@ services:
 
 **Atomic Feature Design**
 Each feature designed to be:
+
 - **Self-contained**: Can be developed and tested independently
 - **Incrementally valuable**: Adds visible user value immediately
 - **Foundation-building**: Enables subsequent features without rework
@@ -579,20 +642,24 @@ Each feature designed to be:
 
 **Milestone Checkpoints**
 After each phase:
+
 - **Deployable**: Can be pushed to production without breaking changes
 - **Demonstrable**: Shows clear user value and functionality
 - **Testable**: Can be validated by users and stakeholders
 - **Extensible**: Ready for next phase development without refactoring
-]
+  ]
 
-# Risks and Mitigations  
+# Risks and Mitigations
+
 [
+
 ## Technical Challenges
 
 **Debug Terminal Complexity (HIGH RISK)**
+
 - **Risk**: Real-time monitoring system is technically complex and unproven in production
 - **Specific Challenges**: Real-time data streaming without performance issues, event collection without memory leaks, complex filtering on large datasets
-- **Mitigation Strategy**: 
+- **Mitigation Strategy**:
   - Incremental implementation in 3 phases (health checks → logging → advanced features)
   - Hard performance limits (max 10,000 log entries, 7-day retention)
   - Graceful degradation (system works even if debug terminal fails)
@@ -600,6 +667,7 @@ After each phase:
 - **Fallback Plan**: Replace with basic health endpoint, simple database logging, and standard monitoring integration
 
 **LLM Integration Reliability (MEDIUM-HIGH RISK)**
+
 - **Risk**: Claude API could fail due to rate limits, cost overruns, or service availability
 - **Specific Challenges**: API rate limiting, unexpected costs, service outages, token counting accuracy
 - **Mitigation Strategy**:
@@ -610,6 +678,7 @@ After each phase:
 - **Fallback Plan**: Replace with simple chatbot responses, pre-written templates, or remove LLM features entirely
 
 **Database Performance Risk (MEDIUM RISK)**
+
 - **Risk**: Prisma ORM and PostgreSQL performance could degrade with high debug log volume
 - **Specific Challenges**: Unbounded log growth, complex filtering queries, connection pool exhaustion
 - **Mitigation Strategy**:
@@ -621,6 +690,7 @@ After each phase:
 ## MVP Definition & Scope Management
 
 **Feature Creep (HIGH RISK)**
+
 - **Risk**: Comprehensive feature set could lead to scope creep and delayed delivery
 - **Current Scope Risks**: Debug terminal expanding beyond monitoring, LLM integration becoming too sophisticated, authentication adding unnecessary complexity
 - **MVP Redefinition**:
@@ -630,6 +700,7 @@ After each phase:
 - **Mitigation Strategy**: Time-boxing each feature, feature flags for disabling complex components, modular architecture allowing feature removal
 
 **Target Audience Complexity (MEDIUM-HIGH RISK)**
+
 - **Risk**: Template might be too complex for mid-level developers
 - **Complexity Indicators**: Too many technology choices, architecture beyond mid-level understanding, debugging requiring advanced knowledge
 - **Mitigation Strategy**:
@@ -640,6 +711,7 @@ After each phase:
 - **Validation**: Regular testing with actual mid-level developers, setup time tracking, support ticket analysis
 
 **Development Time Constraints (MEDIUM RISK)**
+
 - **Risk**: Development could take significantly longer than estimated
 - **Time Constraint Factors**: Debug terminal R&D time, integration testing complexity, documentation creation
 - **Mitigation Strategy**:
@@ -652,6 +724,7 @@ After each phase:
 ## Resource Constraints
 
 **Platform Dependency Risk (MEDIUM RISK)**
+
 - **Risk**: Heavy reliance on Render platform creates vendor lock-in
 - **Specific Challenges**: Platform limitations, pricing changes, migration difficulties
 - **Mitigation Strategy**:
@@ -662,6 +735,7 @@ After each phase:
 - **Alternative Platforms**: Frontend (Vercel, Netlify), Backend (Railway, DigitalOcean), Database (Supabase, PlanetScale)
 
 **Budget and Cost Management (LOW-MEDIUM RISK)**
+
 - **Risk**: Development and operational costs exceeding budget
 - **Cost Factors**: Claude API costs during development, premium hosting requirements
 - **Budget Strategy**:
@@ -673,29 +747,35 @@ After each phase:
 ## Success Criteria & Risk Monitoring
 
 **Technical Success Metrics**
+
 - Setup time: < 2 hours from download to deployed application
 - Performance: Page load < 2 seconds, API response < 500ms
 - Reliability: All core features working in production environment
 - Security: All inputs validated, rate limits preventing abuse
 
 **User Experience Success Metrics**
+
 - Usability: Mid-level developers can deploy without advanced knowledge
 - Documentation: Clear setup guides with examples and troubleshooting
 - Feedback: Positive responses from initial user testing
 - Adoption: Template downloaded and successfully deployed by target users
 
 **Risk Monitoring Framework**
+
 - Weekly risk assessment reviewing all identified risks
 - Risk dashboard with visual tracking of high/medium/low risks
 - Escalation procedures when risks become blocking issues
 - Go/No-Go milestones: Week 4 (core functionality), Week 8 (debug terminal), Week 12 (complete template)
-]
+  ]
 
-# Appendix  
+# Appendix
+
 [
+
 ## Technical Specifications
 
 **Performance Requirements**
+
 - Page Load Time: < 2 seconds
 - API Response Time: < 500ms
 - Database Query Time: < 100ms for simple operations
@@ -703,6 +783,7 @@ After each phase:
 - Debug Log Processing: Real-time with < 1 second delay
 
 **Security Standards**
+
 - HTTPS enforced in production
 - Input validation on all endpoints using Zod schemas
 - Rate limiting: 100 requests per 15-minute window per IP
@@ -712,6 +793,7 @@ After each phase:
 - Security headers including CSP, HSTS, and X-Frame-Options
 
 **Scalability Targets**
+
 - Concurrent Users: 100+ on free tier, 1000+ on paid tier
 - Database Connections: Efficient connection pooling
 - Debug Log Volume: Up to 10,000 entries with automatic cleanup
@@ -719,17 +801,20 @@ After each phase:
 - Storage Requirements: < 1GB for typical application usage
 
 **Browser Support**
+
 - Modern browsers: Chrome 90+, Firefox 88+, Safari 14+, Edge 90+
 - Mobile responsive design for iOS Safari and Android Chrome
 - Progressive Web App capabilities for offline functionality
 
 **Development Environment Requirements**
+
 - Node.js 20+ with npm 10+ or pnpm 8+
 - PostgreSQL 14+ locally or via Docker
 - Git for version control and deployment triggers
 - VSCode recommended with TypeScript and Prisma extensions
 
 **Deployment Specifications**
+
 - Render platform free tier for development
 - Automatic SSL certificate provisioning
 - Environment variable management through Render dashboard
@@ -738,6 +823,7 @@ After each phase:
 - Backend health checks with automatic restart on failure
 
 **Testing Requirements**
+
 - Unit test coverage: > 80% for critical business logic
 - Integration tests for all API endpoints
 - End-to-end tests for key user workflows
@@ -745,10 +831,11 @@ After each phase:
 - Security testing with automated vulnerability scanning
 
 **Documentation Standards**
+
 - README with complete setup instructions
 - API documentation with interactive examples
 - Component documentation with Storybook
 - Deployment guides for multiple platforms
 - Troubleshooting guides with common issues and solutions
 - Video tutorials for complex setup procedures
-]
+  ]

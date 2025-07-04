@@ -14,12 +14,14 @@ A production-ready web application template that gets you from idea to deploymen
 ## 🛠️ Tech Stack
 
 **Frontend**
+
 - React 18 + TypeScript + Vite
 - Tailwind CSS + shadcn/ui components
 - TanStack Query for server state
 - React Hook Form + Zod validation
 
 **Backend**
+
 - Node.js 20 + Express + TypeScript
 - Prisma ORM + PostgreSQL
 - REST API with Zod validation
@@ -27,12 +29,14 @@ A production-ready web application template that gets you from idea to deploymen
 - Claude API integration
 
 **Development Tools**
+
 - Vitest (unit/integration testing)
 - Playwright (E2E testing)
 - ESLint + Prettier + pre-commit hooks
 - Sentry error tracking (optional)
 
 **Deployment**
+
 - Render platform (frontend + backend + database)
 - Infrastructure as Code (render.yaml)
 - Automated CI/CD pipeline
@@ -72,27 +76,30 @@ A production-ready web application template that gets you from idea to deploymen
 ### Setup Your Project
 
 1. **Install dependencies:**
+
    ```bash
    # Install frontend dependencies
    cd frontend
    npm install
 
-   # Install backend dependencies  
+   # Install backend dependencies
    cd ../backend
    npm install
    ```
 
 2. **Set up environment variables:**
+
    ```bash
    # Copy example environment files
    cp backend/.env.example backend/.env
    cp frontend/.env.example frontend/.env
-   
+
    # Edit with your values
    # DATABASE_URL, JWT_SECRET, CLAUDE_API_KEY, etc.
    ```
 
 3. **Initialize database:**
+
    ```bash
    cd backend
    npx prisma migrate dev
@@ -100,11 +107,12 @@ A production-ready web application template that gets you from idea to deploymen
    ```
 
 4. **Start development servers:**
+
    ```bash
    # Terminal 1 - Backend
    cd backend && npm run dev
 
-   # Terminal 2 - Frontend  
+   # Terminal 2 - Frontend
    cd frontend && npm run dev
    ```
 
@@ -118,7 +126,7 @@ A production-ready web application template that gets you from idea to deploymen
 
 2. **Connect to Render:**
    - Go to [render.com](https://render.com) and connect your GitHub account
-   - Select "New" → "Blueprint" 
+   - Select "New" → "Blueprint"
    - Connect your repository
    - Render will automatically detect the `render.yaml` configuration
 
@@ -133,29 +141,37 @@ Your app will be live at `https://YOUR_APP_NAME.onrender.com` in ~5 minutes.
 ## 📖 Key Features Overview
 
 ### Debug Terminal
+
 Real-time system monitoring with color-coded health indicators:
+
 - 🟢 **Green**: All systems operational
-- 🟡 **Yellow**: Warning conditions detected  
+- 🟡 **Yellow**: Warning conditions detected
 - 🔴 **Red**: Critical issues requiring attention
 
 Access via `/admin/debug` (admin users only)
 
 ### LLM Integration
+
 Built-in Claude AI support:
+
 - Chat interface with conversation history
 - Configurable models and parameters
 - Usage tracking and cost monitoring
 - Conversation export/import
 
 ### Authentication System
+
 Enterprise-grade security:
+
 - JWT tokens with refresh capability
 - Role-based permissions (USER/ADMIN/SUPERADMIN)
 - Session management and monitoring
 - Password reset and email verification
 
 ### Configuration Management
+
 Flexible settings storage:
+
 - Database persistence for normal use
 - Text-based export for backup/sharing
 - Checksum validation for integrity
@@ -191,6 +207,7 @@ your-app/
 ### Available Scripts
 
 **Frontend:**
+
 ```bash
 npm run dev          # Start development server
 npm run build        # Build for production
@@ -200,6 +217,7 @@ npm run type-check   # Run TypeScript compiler
 ```
 
 **Backend:**
+
 ```bash
 npm run dev          # Start development server with hot reload
 npm run build        # Compile TypeScript
@@ -216,6 +234,7 @@ npm run db:studio    # Open Prisma Studio
 ### Environment Variables
 
 **Backend (.env):**
+
 ```env
 DATABASE_URL="postgresql://user:password@localhost:5432/myapp"
 JWT_SECRET="your-super-secret-jwt-key"
@@ -225,6 +244,7 @@ PORT=3000
 ```
 
 **Frontend (.env):**
+
 ```env
 VITE_API_URL="http://localhost:3000"
 VITE_APP_NAME="YOUR_APP_NAME"

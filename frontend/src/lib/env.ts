@@ -6,35 +6,35 @@
 interface AppConfig {
   // API Configuration
   apiUrl: string;
-  
+
   // Application Configuration
   appName: string;
   appVersion: string;
   appDescription: string;
-  
+
   // Authentication Configuration
   jwtStorageKey: string;
   sessionTimeoutMinutes: number;
-  
+
   // Feature Flags
   enableLLMChat: boolean;
   enableDebugTerminal: boolean;
   enableUserRegistration: boolean;
   enableEmailVerification: boolean;
-  
+
   // UI Configuration
   defaultTheme: 'light' | 'dark' | 'system';
   defaultLanguage: string;
   enableThemeToggle: boolean;
-  
+
   // Analytics & Monitoring (Optional)
   googleAnalyticsId?: string;
   sentryDsn?: string;
-  
+
   // File Upload Configuration
   maxFileSize: number;
   allowedFileTypes: string[];
-  
+
   // Development Configuration
   isDevelopment: boolean;
   enableDevTools: boolean;
@@ -44,13 +44,19 @@ interface AppConfig {
 // Parse environment variables with defaults
 const parseEnv = (): AppConfig => {
   // Helper function to parse boolean values
-  const parseBoolean = (value: string | undefined, defaultValue: boolean): boolean => {
+  const parseBoolean = (
+    value: string | undefined,
+    defaultValue: boolean
+  ): boolean => {
     if (value === undefined) return defaultValue;
     return value.toLowerCase() === 'true';
   };
 
   // Helper function to parse number values
-  const parseNumber = (value: string | undefined, defaultValue: number): number => {
+  const parseNumber = (
+    value: string | undefined,
+    defaultValue: number
+  ): number => {
     if (value === undefined) return defaultValue;
     const parsed = parseInt(value, 10);
     return isNaN(parsed) ? defaultValue : parsed;
@@ -58,46 +64,69 @@ const parseEnv = (): AppConfig => {
 
   // Helper function to parse file types
   const parseFileTypes = (value: string | undefined): string[] => {
-    if (!value) return ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
+    if (!value)
+      return ['image/jpeg', 'image/png', 'image/gif', 'application/pdf'];
     return value.split(',').map(type => type.trim());
   };
 
   return {
     // API Configuration
     apiUrl: import.meta.env.VITE_API_URL || 'http://localhost:3000',
-    
+
     // Application Configuration
     appName: import.meta.env.VITE_APP_NAME || 'Web App Template',
     appVersion: import.meta.env.VITE_APP_VERSION || '1.0.0',
-    appDescription: import.meta.env.VITE_APP_DESCRIPTION || 'A production-ready web application template',
-    
+    appDescription:
+      import.meta.env.VITE_APP_DESCRIPTION ||
+      'A production-ready web application template',
+
     // Authentication Configuration
     jwtStorageKey: import.meta.env.VITE_JWT_STORAGE_KEY || 'webappauth',
-    sessionTimeoutMinutes: parseNumber(import.meta.env.VITE_SESSION_TIMEOUT_MINUTES, 1440), // 24 hours
-    
+    sessionTimeoutMinutes: parseNumber(
+      import.meta.env.VITE_SESSION_TIMEOUT_MINUTES,
+      1440
+    ), // 24 hours
+
     // Feature Flags
     enableLLMChat: parseBoolean(import.meta.env.VITE_ENABLE_LLM_CHAT, true),
-    enableDebugTerminal: parseBoolean(import.meta.env.VITE_ENABLE_DEBUG_TERMINAL, true),
-    enableUserRegistration: parseBoolean(import.meta.env.VITE_ENABLE_USER_REGISTRATION, true),
-    enableEmailVerification: parseBoolean(import.meta.env.VITE_ENABLE_EMAIL_VERIFICATION, false),
-    
+    enableDebugTerminal: parseBoolean(
+      import.meta.env.VITE_ENABLE_DEBUG_TERMINAL,
+      true
+    ),
+    enableUserRegistration: parseBoolean(
+      import.meta.env.VITE_ENABLE_USER_REGISTRATION,
+      true
+    ),
+    enableEmailVerification: parseBoolean(
+      import.meta.env.VITE_ENABLE_EMAIL_VERIFICATION,
+      false
+    ),
+
     // UI Configuration
-    defaultTheme: (import.meta.env.VITE_DEFAULT_THEME as 'light' | 'dark' | 'system') || 'light',
+    defaultTheme:
+      (import.meta.env.VITE_DEFAULT_THEME as 'light' | 'dark' | 'system') ||
+      'light',
     defaultLanguage: import.meta.env.VITE_DEFAULT_LANGUAGE || 'en',
-    enableThemeToggle: parseBoolean(import.meta.env.VITE_ENABLE_THEME_TOGGLE, true),
-    
+    enableThemeToggle: parseBoolean(
+      import.meta.env.VITE_ENABLE_THEME_TOGGLE,
+      true
+    ),
+
     // Analytics & Monitoring (Optional)
     googleAnalyticsId: import.meta.env.VITE_GOOGLE_ANALYTICS_ID,
     sentryDsn: import.meta.env.VITE_SENTRY_DSN,
-    
+
     // File Upload Configuration
     maxFileSize: parseNumber(import.meta.env.VITE_MAX_FILE_SIZE, 5242880), // 5MB
     allowedFileTypes: parseFileTypes(import.meta.env.VITE_ALLOWED_FILE_TYPES),
-    
+
     // Development Configuration
     isDevelopment: import.meta.env.DEV,
     enableDevTools: parseBoolean(import.meta.env.VITE_ENABLE_DEV_TOOLS, true),
-    showPerformanceMetrics: parseBoolean(import.meta.env.VITE_SHOW_PERFORMANCE_METRICS, false),
+    showPerformanceMetrics: parseBoolean(
+      import.meta.env.VITE_SHOW_PERFORMANCE_METRICS,
+      false
+    ),
   };
 };
 
@@ -105,7 +134,18 @@ const parseEnv = (): AppConfig => {
 export const config = parseEnv();
 
 // Helper functions
-export const isFeatureEnabled = (feature: keyof Pick<AppConfig, 'enableLLMChat' | 'enableDebugTerminal' | 'enableUserRegistration' | 'enableEmailVerification' | 'enableThemeToggle' | 'enableDevTools' | 'showPerformanceMetrics'>): boolean => {
+export const isFeatureEnabled = (
+  feature: keyof Pick<
+    AppConfig,
+    | 'enableLLMChat'
+    | 'enableDebugTerminal'
+    | 'enableUserRegistration'
+    | 'enableEmailVerification'
+    | 'enableThemeToggle'
+    | 'enableDevTools'
+    | 'showPerformanceMetrics'
+  >
+): boolean => {
   return config[feature];
 };
 
@@ -132,7 +172,7 @@ export const formatFileSize = (bytes: number): string => {
 // Configuration summary for debugging
 export const getConfigSummary = () => {
   if (!config.isDevelopment) return null;
-  
+
   return {
     environment: 'development',
     apiUrl: config.apiUrl,

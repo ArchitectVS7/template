@@ -2,7 +2,11 @@ import express from 'express';
 import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
-import { initializeDatabase, disconnectDatabase, checkDatabaseHealth } from './lib/database.js';
+import {
+  initializeDatabase,
+  disconnectDatabase,
+  checkDatabaseHealth,
+} from './lib/database.js';
 import { env, getConfigSummary } from './lib/env.js';
 
 const app = express();
@@ -10,10 +14,12 @@ const PORT = env.PORT;
 
 // Middleware
 app.use(helmet());
-app.use(cors({
-  origin: env.FRONTEND_URL,
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: env.FRONTEND_URL,
+    credentials: true,
+  })
+);
 app.use(morgan('combined'));
 app.use(express.json());
 
@@ -88,11 +94,11 @@ if (env.NODE_ENV !== 'test') {
   const server = app.listen(PORT, async () => {
     console.log(`🚀 Server running on port ${PORT}`);
     console.log(`📍 Environment: ${env.NODE_ENV}`);
-    
+
     // Log configuration summary
     const configSummary = getConfigSummary();
     console.log('⚙️  Configuration:', configSummary);
-    
+
     // Initialize database connection
     try {
       await initializeDatabase();
@@ -105,10 +111,10 @@ if (env.NODE_ENV !== 'test') {
   // Graceful shutdown
   const gracefulShutdown = async (signal: string) => {
     console.log(`\n${signal} received. Starting graceful shutdown...`);
-    
+
     server.close(async () => {
       console.log('HTTP server closed');
-      
+
       try {
         await disconnectDatabase();
         console.log('Database disconnected');

@@ -2,100 +2,99 @@ name: PR Quality Gates
 
 on:
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 jobs:
   frontend-checks:
     name: Frontend Quality
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-    
-    - name: Check if frontend exists
-      run: |
-        if [ -d "frontend" ] && [ -f "frontend/package.json" ]; then
-          echo "Frontend directory found"
-        else
-          echo "Frontend directory not found, skipping"
-          exit 0
-        fi
-    
-    - name: Install frontend dependencies
-      run: |
-        if [ -f "frontend/package.json" ]; then
-          cd frontend && npm ci
-        fi
-    
-    - name: Run frontend checks
-      run: |
-        if [ -f "frontend/package.json" ]; then
-          cd frontend
-          npm run lint:check || echo "Lint check not configured"
-          npm run type-check || echo "Type check not configured"
-          npm run test || echo "Tests not configured"
-          npm run build || echo "Build not configured"
-        fi
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Check if frontend exists
+        run: |
+          if [ -d "frontend" ] && [ -f "frontend/package.json" ]; then
+            echo "Frontend directory found"
+          else
+            echo "Frontend directory not found, skipping"
+            exit 0
+          fi
+
+      - name: Install frontend dependencies
+        run: |
+          if [ -f "frontend/package.json" ]; then
+            cd frontend && npm ci
+          fi
+
+      - name: Run frontend checks
+        run: |
+          if [ -f "frontend/package.json" ]; then
+            cd frontend
+            npm run lint:check || echo "Lint check not configured"
+            npm run type-check || echo "Type check not configured"
+            npm run test || echo "Tests not configured"
+            npm run build || echo "Build not configured"
+          fi
 
   backend-checks:
     name: Backend Quality
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-    
-    - name: Check if backend exists
-      run: |
-        if [ -d "backend" ] && [ -f "backend/package.json" ]; then
-          echo "Backend directory found"
-        else
-          echo "Backend directory not found, skipping"
-          exit 0
-        fi
-    
-    - name: Install backend dependencies
-      run: |
-        if [ -f "backend/package.json" ]; then
-          cd backend && npm ci
-        fi
-    
-    - name: Run backend checks
-      run: |
-        if [ -f "backend/package.json" ]; then
-          cd backend
-          npm run lint:check || echo "Lint check not configured"
-          npm run type-check || echo "Type check not configured"
-          npm run test || echo "Tests not configured"
-          npm run build || echo "Build not configured"
-        fi
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Check if backend exists
+        run: |
+          if [ -d "backend" ] && [ -f "backend/package.json" ]; then
+            echo "Backend directory found"
+          else
+            echo "Backend directory not found, skipping"
+            exit 0
+          fi
+
+      - name: Install backend dependencies
+        run: |
+          if [ -f "backend/package.json" ]; then
+            cd backend && npm ci
+          fi
+
+      - name: Run backend checks
+        run: |
+          if [ -f "backend/package.json" ]; then
+            cd backend
+            npm run lint:check || echo "Lint check not configured"
+            npm run type-check || echo "Type check not configured"
+            npm run test || echo "Tests not configured"
+            npm run build || echo "Build not configured"
+          fi
 
   basic-checks:
     name: Basic Repository Checks
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
-    
-    - name: Check repository structure
-      run: |
-        echo "Repository contents:"
-        ls -la
-        echo "Checking for basic files..."
-        [ -f "README.md" ] && echo "✅ README.md found" || echo "❌ README.md missing"
-        [ -f ".gitignore" ] && echo "✅ .gitignore found" || echo "❌ .gitignore missing"
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-        [ -f ".gitattributes" ] && echo "✅ .gitattributes found" || echo "❌ .gitattributes missing"
+      - name: Check repository structure
+        run: |
+          echo "Repository contents:"
+          ls -la
+          echo "Checking for basic files..."
+          [ -f "README.md" ] && echo "✅ README.md found" || echo "❌ README.md missing"
+          [ -f ".gitignore" ] && echo "✅ .gitignore found" || echo "❌ .gitignore missing"
 
+          [ -f ".gitattributes" ] && echo "✅ .gitattributes found" || echo "❌ .gitattributes missing"

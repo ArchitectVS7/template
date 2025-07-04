@@ -19,12 +19,14 @@ The `render.yaml` file defines the complete infrastructure:
 The following environment variables are automatically configured:
 
 #### Backend
+
 - `DATABASE_URL` - Auto-generated from database service
 - `JWT_SECRET` - Auto-generated secure token
 - `FRONTEND_URL` - Auto-linked to frontend service
 - `NODE_ENV` - Set to "production"
 
-#### Frontend  
+#### Frontend
+
 - `VITE_API_URL` - Auto-linked to backend service
 - `VITE_APP_NAME` - Application display name
 
@@ -67,6 +69,7 @@ The following environment variables are automatically configured:
 ## Cost
 
 All services are configured for the free tier:
+
 - Frontend: Free static site hosting
 - Backend: Free web service (sleeps after 15 min inactivity)
 - Database: Free PostgreSQL (1GB storage)
@@ -75,6 +78,7 @@ All services are configured for the free tier:
 ## Scaling
 
 To scale beyond free tier:
+
 1. Upgrade plans in `render.yaml`
 2. Commit and push changes
 3. Render will automatically apply updates
