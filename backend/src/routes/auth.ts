@@ -252,7 +252,7 @@ router.put(
         level: LogLevel.INFO,
         message: `Profile updated: ${req.user!.email}`,
         component: 'AUTH',
-        userId: userId,
+        userId,
         metadata: {
           changes: { firstName, lastName, email },
           ip: req.ip,
@@ -288,7 +288,7 @@ router.put(
         level: LogLevel.INFO,
         message: `Password changed: ${req.user!.email}`,
         component: 'AUTH',
-        userId: userId,
+        userId,
         metadata: {
           ip: req.ip,
         },

@@ -2,7 +2,7 @@ import request from 'supertest';
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import { PrismaClient } from '@prisma/client';
-import authRoutes from '../routes/auth';
+import { authRoutes } from '../routes/auth';
 import { errorHandler } from '../middleware/errorHandler';
 
 const app = express();
@@ -34,7 +34,8 @@ describe('Authentication API', () => {
       const userData = {
         email: 'test@example.com',
         password: 'password123',
-        name: 'Test User'
+        firstName: 'Test',
+        lastName: 'User'
       };
 
       const response = await request(app)
@@ -45,7 +46,8 @@ describe('Authentication API', () => {
       expect(response.body).toHaveProperty('message', 'User registered successfully');
       expect(response.body).toHaveProperty('user');
       expect(response.body.user.email).toBe(userData.email);
-      expect(response.body.user.name).toBe(userData.name);
+      expect(response.body.user.firstName).toBe(userData.firstName);
+      expect(response.body.user.lastName).toBe(userData.lastName);
       expect(response.body.user).not.toHaveProperty('password');
     });
 
@@ -53,7 +55,8 @@ describe('Authentication API', () => {
       const userData = {
         email: 'test@example.com',
         password: 'password123',
-        name: 'Test User'
+        firstName: 'Test',
+        lastName: 'User'
       };
 
       // Create user first
@@ -88,7 +91,8 @@ describe('Authentication API', () => {
         data: {
           email: 'test@example.com',
           password: hashedPassword,
-          name: 'Test User',
+          firstName: 'Test',
+          lastName: 'User',
           role: 'USER'
         }
       });
@@ -144,7 +148,8 @@ describe('Authentication API', () => {
         data: {
           email: 'test@example.com',
           password: hashedPassword,
-          name: 'Test User',
+          firstName: 'Test',
+          lastName: 'User',
           role: 'USER'
         }
       });

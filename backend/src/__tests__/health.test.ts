@@ -1,6 +1,6 @@
 import request from 'supertest';
 import express from 'express';
-import healthRoutes from '../routes/health';
+import { healthRoutes } from '../routes/health';
 
 const app = express();
 app.use(express.json());

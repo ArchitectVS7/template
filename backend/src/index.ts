@@ -11,7 +11,6 @@ dotenv.config();
 
 // Import middleware and routes
 import { errorHandler } from './middleware/errorHandler';
-import { requestLogger } from './middleware/requestLogger';
 import { authRoutes } from './routes/auth';
 import { healthRoutes } from './routes/health';
 import { debugRoutes } from './routes/debug';

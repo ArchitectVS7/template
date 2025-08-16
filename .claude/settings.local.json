@@ -24,7 +24,11 @@
       "Bash(npm audit:*)",
       "Bash(grep:*)",
       "Bash(git checkout:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(DATABASE_URL=\"file:./test.db\" npx prisma migrate deploy)",
+      "Bash(DATABASE_URL=\"file:./test.db\" npx prisma migrate deploy --schema=../prisma/schema.prisma)",
+      "Bash(pkill:*)",
+      "Bash(npm run test:e2e:*)"
     ],
     "deny": [],
     "ask": []
