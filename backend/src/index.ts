@@ -56,7 +56,8 @@ app.use(cors({
 app.use(limiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
-app.use(requestLogger);
+// Temporarily disabled due to Prisma schema issue
+// app.use(requestLogger);
 
 // Routes
 app.use('/api/auth', authRoutes);

@@ -30,6 +30,7 @@ export const errorHandler = (
   res.status(statusCode).json({
     success: false,
     error: message,
+    ...((error as any).validationErrors && { validationErrors: (error as any).validationErrors }),
     ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
   });
 };

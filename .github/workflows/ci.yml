@@ -1,0 +1,344 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  # Install dependencies and cache them
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      backend-cache-key: ${{ steps.cache-backend.outputs.cache-hit }}
+      frontend-cache-key: ${{ steps.cache-frontend.outputs.cache-hit }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      # Root dependencies
+      - name: Cache root dependencies
+        id: cache-root
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-root-${{ hashFiles('package-lock.json') }}
+
+      - name: Install root dependencies
+        if: steps.cache-root.outputs.cache-hit != 'true'
+        run: npm ci
+
+      # Backend dependencies
+      - name: Cache backend dependencies
+        id: cache-backend
+        uses: actions/cache@v4
+        with:
+          path: backend/node_modules
+          key: ${{ runner.os }}-backend-${{ hashFiles('backend/package-lock.json') }}
+
+      - name: Install backend dependencies
+        if: steps.cache-backend.outputs.cache-hit != 'true'
+        run: npm ci --prefix backend
+
+      # Frontend dependencies
+      - name: Cache frontend dependencies
+        id: cache-frontend
+        uses: actions/cache@v4
+        with:
+          path: frontend/node_modules
+          key: ${{ runner.os }}-frontend-${{ hashFiles('frontend/package-lock.json') }}
+
+      - name: Install frontend dependencies
+        if: steps.cache-frontend.outputs.cache-hit != 'true'
+        run: npm ci --prefix frontend
+
+  # Lint and format check
+  lint:
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Restore root dependencies
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-root-${{ hashFiles('package-lock.json') }}
+
+      - name: Restore backend dependencies
+        uses: actions/cache@v4
+        with:
+          path: backend/node_modules
+          key: ${{ runner.os }}-backend-${{ hashFiles('backend/package-lock.json') }}
+
+      - name: Restore frontend dependencies
+        uses: actions/cache@v4
+        with:
+          path: frontend/node_modules
+          key: ${{ runner.os }}-frontend-${{ hashFiles('frontend/package-lock.json') }}
+
+      - name: Run backend lint
+        run: npm run lint --prefix backend
+
+      - name: Run frontend lint
+        run: npm run lint --prefix frontend
+
+      - name: Check formatting (backend)
+        run: npm run format:check --prefix backend
+
+      - name: Check formatting (frontend)
+        run: npm run format:check --prefix frontend
+
+  # Test backend
+  test-backend:
+    runs-on: ubuntu-latest
+    needs: setup
+    env:
+      DATABASE_URL: "file:./test.db"
+      JWT_SECRET: "test-secret-key-for-ci"
+      NODE_ENV: "test"
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Restore root dependencies
+        uses: actions/cache@v4
+        with:
+          path: node_modules
+          key: ${{ runner.os }}-root-${{ hashFiles('package-lock.json') }}
+
+      - name: Restore backend dependencies
+        uses: actions/cache@v4
+        with:
+          path: backend/node_modules
+          key: ${{ runner.os }}-backend-${{ hashFiles('backend/package-lock.json') }}
+
+      - name: Generate Prisma client
+        run: npm run prisma:generate --prefix backend
+
+      - name: Run database migrations
+        run: npm run prisma:migrate --prefix backend
+
+      - name: Run backend tests
+        run: npm test --prefix backend
+
+      - name: Upload backend test coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-coverage
+          path: backend/coverage/
+
+  # Test frontend
+  test-frontend:
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Restore frontend dependencies
+        uses: actions/cache@v4
+        with:
+          path: frontend/node_modules
+          key: ${{ runner.os }}-frontend-${{ hashFiles('frontend/package-lock.json') }}
+
+      - name: Run frontend tests
+        run: npm test --prefix frontend
+
+      - name: Upload frontend test coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-coverage
+          path: frontend/coverage/
+
+  # Build applications
+  build:
+    runs-on: ubuntu-latest
+    needs: [lint, test-backend, test-frontend]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Restore all dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            backend/node_modules
+            frontend/node_modules
+          key: ${{ runner.os }}-all-deps-${{ hashFiles('package-lock.json', 'backend/package-lock.json', 'frontend/package-lock.json') }}
+
+      - name: Generate Prisma client
+        run: npm run prisma:generate --prefix backend
+
+      - name: Build backend
+        run: npm run build --prefix backend
+
+      - name: Build frontend
+        run: npm run build --prefix frontend
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-artifacts
+          path: |
+            backend/dist/
+            frontend/dist/
+
+  # Security scanning
+  security:
+    runs-on: ubuntu-latest
+    needs: setup
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Restore all dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            backend/node_modules
+            frontend/node_modules
+          key: ${{ runner.os }}-all-deps-${{ hashFiles('package-lock.json', 'backend/package-lock.json', 'frontend/package-lock.json') }}
+
+      - name: Run security audit
+        run: |
+          npm audit --audit-level high
+          npm audit --audit-level high --prefix backend
+          npm audit --audit-level high --prefix frontend
+
+      - name: Check for vulnerable dependencies
+        run: |
+          npx audit-ci --high
+          npx audit-ci --high --config backend/package.json
+          npx audit-ci --high --config frontend/package.json
+
+  # E2E Testing (when ready)
+  e2e:
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    env:
+      DATABASE_URL: "file:./e2e.db"
+      JWT_SECRET: "e2e-test-secret-key"
+      NODE_ENV: "test"
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Restore all dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            node_modules
+            backend/node_modules
+            frontend/node_modules
+          key: ${{ runner.os }}-all-deps-${{ hashFiles('package-lock.json', 'backend/package-lock.json', 'frontend/package-lock.json') }}
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: build-artifacts
+
+      - name: Setup test database
+        run: |
+          npm run prisma:generate --prefix backend
+          npm run prisma:migrate --prefix backend
+
+      - name: Start backend for E2E tests
+        run: |
+          npm start --prefix backend &
+          sleep 10
+        env:
+          PORT: 3001
+
+      - name: Run E2E tests
+        run: npm run test:e2e --prefix frontend
+
+  # Deployment readiness check
+  deploy-check:
+    runs-on: ubuntu-latest
+    needs: [build, security]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate Render configuration
+        run: |
+          if [[ ! -f "render.yaml" ]]; then
+            echo "render.yaml not found"
+            exit 1
+          fi
+          echo "✅ Render configuration exists"
+
+      - name: Check environment template
+        run: |
+          if [[ ! -f "backend/.env.example" ]] && [[ ! -f ".env.example" ]]; then
+            echo "⚠️  No environment template found"
+          else
+            echo "✅ Environment template exists"
+          fi
+
+      - name: Validate package.json scripts
+        run: |
+          node -e "
+            const pkg = require('./package.json');
+            const requiredScripts = ['dev', 'build', 'start'];
+            const missing = requiredScripts.filter(script => !pkg.scripts[script]);
+            if (missing.length > 0) {
+              console.error('Missing required scripts:', missing);
+              process.exit(1);
+            }
+            console.log('✅ All required scripts present');
+          "
+
+      - name: Success notification
+        run: |
+          echo "🚀 All deployment checks passed!"
+          echo "📦 Artifacts ready for deployment"
+          echo "🔒 Security scans completed"
+          echo "✅ Ready for production deployment"
