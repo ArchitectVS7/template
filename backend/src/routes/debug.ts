@@ -4,6 +4,17 @@ import { LogLevel } from '@prisma/client';
 
 const router = Router();
 
+// Type for debug log query options
+interface DebugLogOptions {
+  limit: number;
+  offset: number;
+  level?: LogLevel;
+  component?: string;
+  userId?: string;
+  startDate?: Date;
+  endDate?: Date;
+}
+
 // Get debug logs
 router.get('/logs', async (req: Request, res: Response) => {
   try {
@@ -17,7 +28,7 @@ router.get('/logs', async (req: Request, res: Response) => {
       endDate
     } = req.query;
 
-    const options: any = {
+    const options: DebugLogOptions = {
       limit: parseInt(limit as string),
       offset: parseInt(offset as string)
     };
@@ -101,7 +112,7 @@ router.post('/log', async (req: Request, res: Response) => {
       level: level as LogLevel,
       message,
       component,
-      userId: (req as any).user?.id || null,
+      userId: req.user?.id || null,
       metadata
     });
 

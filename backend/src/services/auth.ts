@@ -152,7 +152,7 @@ export class AuthService {
     userAgent?: string;
     ipAddress?: string;
   }): Promise<{ user: Omit<User, 'password'>; tokens: AuthTokens }> {
-    const { email, password, userAgent, ipAddress } = data;
+    const { email, password: userPassword, userAgent, ipAddress } = data;
 
     // Find user
     const user = await db.prisma.user.findUnique({
@@ -164,7 +164,7 @@ export class AuthService {
     }
 
     // Verify password
-    const isValidPassword = await this.verifyPassword(password, user.password);
+    const isValidPassword = await this.verifyPassword(userPassword, user.password);
     if (!isValidPassword) {
       throw createError('Invalid credentials', 401);
     }
@@ -180,6 +180,7 @@ export class AuthService {
     await this.createSession(user.id, tokens.refreshToken, userAgent, ipAddress);
 
     // Remove password from response
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: _, ...userWithoutPassword } = user;
 
     logger.info('User logged in successfully:', { 
@@ -196,7 +197,7 @@ export class AuthService {
    */
   static async refreshAccessToken(refreshToken: string): Promise<AuthTokens> {
     // Verify refresh token
-    const { userId } = this.verifyRefreshToken(refreshToken);
+    this.verifyRefreshToken(refreshToken);
 
     // Check if session exists and is active
     const session = await db.prisma.session.findUnique({

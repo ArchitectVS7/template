@@ -33,7 +33,7 @@ describe('Authentication API', () => {
     it('should register a new user successfully', async () => {
       const userData = {
         email: 'test@example.com',
-        password: 'password123',
+        password: 'Password123!',
         firstName: 'Test',
         lastName: 'User'
       };
@@ -44,17 +44,18 @@ describe('Authentication API', () => {
         .expect(201);
 
       expect(response.body).toHaveProperty('message', 'User registered successfully');
-      expect(response.body).toHaveProperty('user');
-      expect(response.body.user.email).toBe(userData.email);
-      expect(response.body.user.firstName).toBe(userData.firstName);
-      expect(response.body.user.lastName).toBe(userData.lastName);
-      expect(response.body.user).not.toHaveProperty('password');
+      expect(response.body).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('user');
+      expect(response.body.data.user.email).toBe(userData.email);
+      expect(response.body.data.user.firstName).toBe(userData.firstName);
+      expect(response.body.data.user.lastName).toBe(userData.lastName);
+      expect(response.body.data.user).not.toHaveProperty('password');
     });
 
     it('should not register user with existing email', async () => {
       const userData = {
         email: 'test@example.com',
-        password: 'password123',
+        password: 'Password123!',
         firstName: 'Test',
         lastName: 'User'
       };
@@ -68,7 +69,7 @@ describe('Authentication API', () => {
       const response = await request(app)
         .post('/api/auth/register')
         .send(userData)
-        .expect(400);
+        .expect(409);
 
       expect(response.body).toHaveProperty('error');
     });
@@ -86,7 +87,7 @@ describe('Authentication API', () => {
   describe('POST /api/auth/login', () => {
     beforeEach(async () => {
       // Create a test user
-      const hashedPassword = await bcrypt.hash('password123', 10);
+      const hashedPassword = await bcrypt.hash('Password123!', 10);
       await prisma.user.create({
         data: {
           email: 'test@example.com',
@@ -103,14 +104,16 @@ describe('Authentication API', () => {
         .post('/api/auth/login')
         .send({
           email: 'test@example.com',
-          password: 'password123'
+          password: 'Password123!'
         })
         .expect(200);
 
       expect(response.body).toHaveProperty('message', 'Login successful');
-      expect(response.body).toHaveProperty('user');
-      expect(response.body).toHaveProperty('token');
-      expect(response.body).toHaveProperty('refreshToken');
+      expect(response.body).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('user');
+      expect(response.body.data).toHaveProperty('tokens');
+      expect(response.body.data.tokens).toHaveProperty('accessToken');
+      expect(response.body.data.tokens).toHaveProperty('refreshToken');
     });
 
     it('should not login with invalid password', async () => {
@@ -130,7 +133,7 @@ describe('Authentication API', () => {
         .post('/api/auth/login')
         .send({
           email: 'nonexistent@example.com',
-          password: 'password123'
+          password: 'Password123!'
         })
         .expect(401);
 
@@ -143,8 +146,8 @@ describe('Authentication API', () => {
 
     beforeEach(async () => {
       // Create user and get refresh token
-      const hashedPassword = await bcrypt.hash('password123', 10);
-      const user = await prisma.user.create({
+      const hashedPassword = await bcrypt.hash('Password123!', 10);
+      await prisma.user.create({
         data: {
           email: 'test@example.com',
           password: hashedPassword,
@@ -158,10 +161,10 @@ describe('Authentication API', () => {
         .post('/api/auth/login')
         .send({
           email: 'test@example.com',
-          password: 'password123'
+          password: 'Password123!'
         });
 
-      refreshToken = loginResponse.body.refreshToken;
+      refreshToken = loginResponse.body.data.tokens.refreshToken;
     });
 
     it('should refresh token with valid refresh token', async () => {
@@ -170,8 +173,10 @@ describe('Authentication API', () => {
         .send({ refreshToken })
         .expect(200);
 
-      expect(response.body).toHaveProperty('token');
-      expect(response.body).toHaveProperty('refreshToken');
+      expect(response.body).toHaveProperty('data');
+      expect(response.body.data).toHaveProperty('tokens');
+      expect(response.body.data.tokens).toHaveProperty('accessToken');
+      expect(response.body.data.tokens).toHaveProperty('refreshToken');
     });
 
     it('should not refresh with invalid token', async () => {

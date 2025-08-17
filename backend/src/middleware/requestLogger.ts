@@ -9,7 +9,7 @@ export const requestLogger = async (req: Request, res: Response, next: NextFunct
   const originalEnd = res.end;
 
   // Override the end function to log when response is sent
-  res.end = function(...args: any[]) {
+  res.end = function(...args: unknown[]) {
     const duration = Date.now() - startTime;
     const statusCode = res.statusCode;
 
@@ -33,18 +33,18 @@ export const requestLogger = async (req: Request, res: Response, next: NextFunct
       endpoint: req.url,
       statusCode,
       duration,
-      userId: (req as any).user?.id || null,
+      userId: req.user?.id || null,
       metadata: {
         ip: req.ip,
         userAgent: req.get('User-Agent')
       }
-    }).catch((err: any) => {
+    }).catch((err: unknown) => {
       logger.error('Failed to log debug request:', err);
     });
 
     // Call the original end function
-    return (originalEnd as any).apply(res, args);
-  } as any;
+    return originalEnd.apply(res, args as Parameters<typeof originalEnd>);
+  };
 
   next();
 };

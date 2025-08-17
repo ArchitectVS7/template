@@ -28,9 +28,22 @@
       "Bash(DATABASE_URL=\"file:./test.db\" npx prisma migrate deploy)",
       "Bash(DATABASE_URL=\"file:./test.db\" npx prisma migrate deploy --schema=../prisma/schema.prisma)",
       "Bash(pkill:*)",
-      "Bash(npm run test:e2e:*)"
+      "Bash(npm run test:e2e:*)",
+      "Bash(git push:*)",
+      "Bash(node:*)",
+      "Bash(npm run test:backend:*)",
+      "Bash(npm run test:*)",
+      "Bash(npm run security:check:*)",
+      "WebFetch(domain:docs.anthropic.com)",
+      "Bash(move:*)",
+      "Bash(cmd /c:*)",
+      "Bash(cp:*)"
     ],
     "deny": [],
-    "ask": []
+    "ask": [],
+    "additionalDirectories": [
+      "C:\\C\\dev\\GIT\\template",
+      "C:\\c\\dev\\GIT\\template"
+    ]
   }
 }

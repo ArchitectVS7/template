@@ -11,7 +11,7 @@ export interface ValidationRule {
   min?: number;
   max?: number;
   pattern?: RegExp;
-  custom?: (value: any) => { valid: boolean; message?: string };
+  custom?: (value: unknown) => { valid: boolean; message?: string };
 }
 
 /**
@@ -58,20 +58,22 @@ export const validate = (rules: ValidationRule[], source: 'body' | 'query' | 'pa
               continue;
             }
             break;
-          case 'email':
+          case 'email': {
             const emailValidation = AuthService.validateEmail(value);
             if (!emailValidation.valid) {
               errors[fieldName] = emailValidation.message || `${fieldName} must be a valid email`;
               continue;
             }
             break;
-          case 'password':
+          }
+          case 'password': {
             const passwordValidation = AuthService.validatePassword(value);
             if (!passwordValidation.valid) {
               errors[fieldName] = passwordValidation.message || `${fieldName} is not strong enough`;
               continue;
             }
             break;
+          }
         }
       }
 
@@ -118,7 +120,7 @@ export const validate = (rules: ValidationRule[], source: 'body' | 'query' | 'pa
     // If there are validation errors, return them
     if (Object.keys(errors).length > 0) {
       const error = createError('Validation failed', 422);
-      (error as any).validationErrors = errors;
+      error.validationErrors = errors;
       return next(error);
     }
 
@@ -167,7 +169,7 @@ export const validationRules = {
   // Debug log validation
   debugLog: [
     { field: 'level', required: true, type: 'string' as const, 
-      custom: (value: any) => ['DEBUG', 'INFO', 'WARN', 'ERROR'].includes(value) 
+      custom: (value: unknown) => ['DEBUG', 'INFO', 'WARN', 'ERROR'].includes(value as string) 
         ? { valid: true } 
         : { valid: false, message: 'level must be DEBUG, INFO, WARN, or ERROR' }
     },
@@ -186,7 +188,7 @@ export const validationRules = {
  * Sanitize input by removing potentially dangerous characters
  */
 export const sanitizeInput = (req: Request, res: Response, next: NextFunction) => {
-  const sanitize = (obj: any): any => {
+  const sanitize = (obj: unknown): unknown => {
     if (typeof obj !== 'object' || obj === null) {
       return obj;
     }
@@ -195,7 +197,7 @@ export const sanitizeInput = (req: Request, res: Response, next: NextFunction) =
       return obj.map(sanitize);
     }
 
-    const sanitized: any = {};
+    const sanitized: Record<string, unknown> = {};
     for (const [key, value] of Object.entries(obj)) {
       if (typeof value === 'string') {
         // Remove potentially dangerous HTML/script tags

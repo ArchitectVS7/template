@@ -4,13 +4,14 @@ import { logger } from '../utils/logger';
 export interface AppError extends Error {
   statusCode?: number;
   isOperational?: boolean;
+  validationErrors?: Record<string, string>;
 }
 
 export const errorHandler = (
   error: AppError,
   req: Request,
   res: Response,
-  next: NextFunction
+  _next: NextFunction
 ) => {
   const statusCode = error.statusCode || 500;
   const message = error.message || 'Internal Server Error';
@@ -30,7 +31,7 @@ export const errorHandler = (
   res.status(statusCode).json({
     success: false,
     error: message,
-    ...((error as any).validationErrors && { validationErrors: (error as any).validationErrors }),
+    ...(error.validationErrors && { validationErrors: error.validationErrors }),
     ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
   });
 };

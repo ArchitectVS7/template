@@ -15,7 +15,9 @@ import { authRoutes } from './routes/auth';
 import { healthRoutes } from './routes/health';
 import { debugRoutes } from './routes/debug';
 import { userRoutes } from './routes/users';
+import llmRoutes from './routes/llm';
 import { setupWebSocket } from './services/websocket';
+import { logger } from './utils/logger';
 
 const app = express();
 const server = createServer(app);
@@ -63,6 +65,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/health', healthRoutes);
 app.use('/api/debug', debugRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/llm', llmRoutes);
 
 // WebSocket setup
 setupWebSocket(io);
@@ -71,9 +74,9 @@ setupWebSocket(io);
 app.use(errorHandler);
 
 server.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📊 Health check available at: http://localhost:${PORT}/api/health`);
-  console.log(`🔒 CORS enabled for: ${process.env.CORS_ORIGIN || "http://localhost:5173"}`);
+  logger.info(`🚀 Server running on port ${PORT}`);
+  logger.info(`📊 Health check available at: http://localhost:${PORT}/api/health`);
+  logger.info(`🔒 CORS enabled for: ${process.env.CORS_ORIGIN || "http://localhost:5173"}`);
 });
 
 export { app, server, io };

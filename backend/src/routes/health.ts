@@ -42,7 +42,7 @@ router.get('/', async (req: Request, res: Response) => {
           uptime: health.uptime
         }
       }
-    }).catch((err: any) => {
+    }).catch((err: unknown) => {
       logger.error('Failed to log health check:', err);
     });
 
