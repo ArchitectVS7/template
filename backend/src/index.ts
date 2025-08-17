@@ -11,7 +11,6 @@ dotenv.config();
 
 // Import middleware and routes
 import { errorHandler } from './middleware/errorHandler';
-import { requestLogger } from './middleware/requestLogger';
 import { authRoutes } from './routes/auth';
 import { healthRoutes } from './routes/health';
 import { debugRoutes } from './routes/debug';
@@ -56,7 +55,8 @@ app.use(cors({
 app.use(limiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
-app.use(requestLogger);
+// Temporarily disabled due to Prisma schema issue
+// app.use(requestLogger);
 
 // Routes
 app.use('/api/auth', authRoutes);
