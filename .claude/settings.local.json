@@ -40,7 +40,9 @@
       "Bash(cp:*)",
       "Bash(cat:*)",
       "Bash(npm run setup:db:*)",
-      "Bash(git log:*)"
+      "Bash(git log:*)",
+      "Bash(git commit:*)",
+      "Bash(git merge:*)"
     ],
     "deny": [],
     "ask": [],
