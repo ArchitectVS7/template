@@ -4,11 +4,18 @@ import { AuthService } from '../services/auth';
 import { authenticateToken, authRateLimit } from '../middleware/auth';
 import { validate, validationRules, sanitizeInput, requireJsonBody } from '../middleware/validation';
 import { createError } from '../middleware/errorHandler';
-import { logger } from '../utils/logger';
 import { debugLogService } from '../services/debugLog';
 import { LogLevel } from '@prisma/client';
 
 const router = Router();
+
+// Helper function to ensure user is authenticated
+const requireUser = (req: Request): NonNullable<Request['user']> => {
+  if (!req.user) {
+    throw createError('User not authenticated', 401);
+  }
+  return req.user;
+};
 
 // Apply input sanitization to all routes
 router.use(sanitizeInput);
@@ -147,17 +154,18 @@ router.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const refreshToken = req.body.refreshToken;
+      const user = requireUser(req);
       
-      await AuthService.logoutUser(req.user!.id, refreshToken);
+      await AuthService.logoutUser(user.id, refreshToken);
 
       // Log successful logout
       await debugLogService.logEvent({
         level: LogLevel.INFO,
-        message: `User logged out: ${req.user!.email}`,
+        message: `User logged out: ${user.email}`,
         component: 'AUTH',
-        userId: req.user!.id,
+        userId: user.id,
         metadata: {
-          email: req.user!.email,
+          email: user.email,
           ip: req.ip,
         },
       });
@@ -178,16 +186,17 @@ router.post(
   authenticateToken,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      await AuthService.logoutUser(req.user!.id); // No refresh token = logout all
+      const user = requireUser(req);
+      await AuthService.logoutUser(user.id); // No refresh token = logout all
 
       // Log successful logout from all devices
       await debugLogService.logEvent({
         level: LogLevel.INFO,
-        message: `User logged out from all devices: ${req.user!.email}`,
+        message: `User logged out from all devices: ${user.email}`,
         component: 'AUTH',
-        userId: req.user!.id,
+        userId: user.id,
         metadata: {
-          email: req.user!.email,
+          email: user.email,
           ip: req.ip,
         },
       });
@@ -209,7 +218,7 @@ router.get(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       // User is already attached to request by authenticateToken middleware
-      const user = req.user!;
+      const user = requireUser(req);
 
       res.json({
         success: true,
@@ -230,10 +239,11 @@ router.put(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { firstName, lastName, email } = req.body;
-      const userId = req.user!.id;
+      const user = requireUser(req);
+      const userId = user.id;
 
       // Check if email is being changed and if it's already in use
-      if (email && email !== req.user!.email) {
+      if (email && email !== user.email) {
         const existingUser = await AuthService.getUserById(userId);
         if (existingUser) {
           throw createError('Email already in use', 409);
@@ -250,7 +260,7 @@ router.put(
       // Log profile update
       await debugLogService.logEvent({
         level: LogLevel.INFO,
-        message: `Profile updated: ${req.user!.email}`,
+        message: `Profile updated: ${user.email}`,
         component: 'AUTH',
         userId,
         metadata: {
@@ -279,14 +289,15 @@ router.put(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { currentPassword, newPassword } = req.body;
-      const userId = req.user!.id;
+      const user = requireUser(req);
+      const userId = user.id;
 
       await AuthService.changePassword(userId, currentPassword, newPassword);
 
       // Log password change
       await debugLogService.logEvent({
         level: LogLevel.INFO,
-        message: `Password changed: ${req.user!.email}`,
+        message: `Password changed: ${user.email}`,
         component: 'AUTH',
         userId,
         metadata: {
@@ -310,7 +321,8 @@ router.get(
   authenticateToken,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const sessions = await AuthService.getUserSessions(req.user!.id);
+      const user = requireUser(req);
+      const sessions = await AuthService.getUserSessions(user.id);
 
       res.json({
         success: true,

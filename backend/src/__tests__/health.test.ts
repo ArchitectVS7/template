@@ -28,19 +28,19 @@ describe('Health Check API', () => {
 
       expect(response.body).toHaveProperty('status');
       expect(response.body).toHaveProperty('timestamp');
-      expect(response.body).toHaveProperty('uptime');
       expect(response.body).toHaveProperty('system');
-      expect(response.body).toHaveProperty('database');
-      expect(response.body).toHaveProperty('services');
+      expect(response.body.system).toHaveProperty('uptime');
+      expect(response.body).toHaveProperty('checks');
+      expect(response.body.checks).toHaveProperty('database');
 
       // Check system information structure
-      expect(response.body.system).toHaveProperty('memory');
-      expect(response.body.system).toHaveProperty('cpu');
+      expect(response.body.system).toHaveProperty('nodeVersion');
       expect(response.body.system).toHaveProperty('platform');
+      expect(response.body.system).toHaveProperty('arch');
 
       // Check database information structure
-      expect(response.body.database).toHaveProperty('status');
-      expect(response.body.database.status).toMatch(/^(connected|disconnected|error)$/);
+      expect(response.body.checks.database).toHaveProperty('status');
+      expect(response.body.checks.database.status).toMatch(/^(healthy|warning|unhealthy)$/);
     });
   });
 });

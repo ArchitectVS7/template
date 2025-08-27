@@ -15,7 +15,10 @@ import { authRoutes } from './routes/auth';
 import { healthRoutes } from './routes/health';
 import { debugRoutes } from './routes/debug';
 import { userRoutes } from './routes/users';
+import llmRoutes from './routes/llm';
 import { setupWebSocket } from './services/websocket';
+import { logger } from './utils/logger';
+import { requestLogger } from './middleware/requestLogger';
 
 const app = express();
 const server = createServer(app);
@@ -31,7 +34,7 @@ const PORT = process.env.PORT || 3000;
 // Rate limiting
 const limiter = rateLimit({
   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'), // 15 minutes
-  max: parseInt(process.env.RATE_LIMIT_MAX || '100'), // limit each IP to 100 requests per windowMs
+  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || process.env.RATE_LIMIT_MAX || '100'), // support both env names
   message: 'Too many requests from this IP, please try again later.'
 });
 
@@ -55,14 +58,17 @@ app.use(cors({
 app.use(limiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
-// Temporarily disabled due to Prisma schema issue
-// app.use(requestLogger);
+// Enable request logging if env flag is true (avoids noisy logs in prod/tests)
+if ((process.env.ENABLE_REQUEST_LOGGING || 'true').toString().toLowerCase() === 'true') {
+  app.use(requestLogger);
+}
 
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/health', healthRoutes);
 app.use('/api/debug', debugRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/llm', llmRoutes);
 
 // WebSocket setup
 setupWebSocket(io);
@@ -71,9 +77,9 @@ setupWebSocket(io);
 app.use(errorHandler);
 
 server.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
-  console.log(`📊 Health check available at: http://localhost:${PORT}/api/health`);
-  console.log(`🔒 CORS enabled for: ${process.env.CORS_ORIGIN || "http://localhost:5173"}`);
+  logger.info(`🚀 Server running on port ${PORT}`);
+  logger.info(`📊 Health check available at: http://localhost:${PORT}/api/health`);
+  logger.info(`🔒 CORS enabled for: ${process.env.CORS_ORIGIN || "http://localhost:5173"}`);
 });
 
 export { app, server, io };

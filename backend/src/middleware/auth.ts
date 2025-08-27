@@ -6,6 +6,7 @@ import { logger } from '../utils/logger';
 
 // Extend Request interface to include user
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace Express {
     interface Request {
       user?: {
@@ -86,7 +87,7 @@ export const authenticateOptional = async (
     }
     
     next();
-  } catch (error) {
+  } catch {
     // Don't fail for optional auth - just continue without user
     next();
   }

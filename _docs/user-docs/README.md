@@ -24,34 +24,6 @@ A production-ready web application template featuring authentication, modern UI 
 2. Deploy to Render using the included blueprint
 3. Access your live application in under 30 minutes
 
-What you need to do locally
-Ensure PostgreSQL is running and the database exists.
-
-Example DATABASE_URL: postgresql://username:password@localhost:5432/ai_dev_mvp
-Create DB if needed: createdb ai_dev_mvp
-Set env variables
-
-backend/.env: ensure DATABASE_URL is Postgres, PORT=3001, FRONTEND_URL=http://localhost:5174, and optionally ENABLE_REQUEST_LOGGING=true.
-prisma/.env: ensure DATABASE_URL matches backend/.env.
-Generate client and run migrations
-
-From repo root:
-npm run db:migrate
-npm run db:seed
-Run locally
-
-npm run dev
-Backend should be at http://localhost:3001, frontend at http://localhost:5174.
-Render deployment readiness
-render.yaml is already set to provision Postgres and wire env vars.
-With Prisma set to Postgres and migrations prepared, deployment should work:
-Backend build: cd backend && npm install && npm run build
-Start: cd backend && npm start
-Static frontend served from frontend/dist.
-Optional small polish
-If you want less log noise in prod: set ENABLE_REQUEST_LOGGING=false on Render.
-Verify CORS and WebSocket origins via FRONTEND_URL/CORS_ORIGIN envs (already wired in render.yaml).
-
 For detailed instructions, see the [Quick Start Guide](/user-docs/quick-start-guide.md).
 
 ## Documentation

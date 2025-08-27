@@ -28,9 +28,59 @@
       "Bash(DATABASE_URL=\"file:./test.db\" npx prisma migrate deploy)",
       "Bash(DATABASE_URL=\"file:./test.db\" npx prisma migrate deploy --schema=../prisma/schema.prisma)",
       "Bash(pkill:*)",
-      "Bash(npm run test:e2e:*)"
+      "Bash(npm run test:e2e:*)",
+      "Bash(git push:*)",
+      "Bash(node:*)",
+      "Bash(npm run test:backend:*)",
+      "Bash(npm run test:*)",
+      "Bash(npm run security:check:*)",
+      "WebFetch(domain:docs.anthropic.com)",
+      "Bash(move:*)",
+      "Bash(cmd /c:*)",
+      "Bash(cp:*)",
+      "Bash(cat:*)",
+      "Bash(npm run setup:db:*)",
+      "Bash(git log:*)",
+      "Bash(git commit:*)",
+      "Bash(git merge:*)"
     ],
     "deny": [],
-    "ask": []
+    "ask": [],
+    "additionalDirectories": [
+      "C:\\C\\dev\\GIT\\template",
+      "C:\\c\\dev\\GIT\\template",
+      "C:\\Users\\J\\.claude"
+    ]
+  },
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "TodoWrite",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'Task list updated - triggering Orchestrator agent' && claude-code --agent orchestrator --prompt 'A task list has been created or updated. Please analyze the current tasks and coordinate the implementation workflow using your specialized sub-agents. Follow your mandatory workflow: read documentation, create detailed task breakdown, and delegate to coding agent for implementation.'"
+          }
+        ]
+      },
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'Code modification detected - triggering Coding-Agent for review' && claude-code --agent coding --prompt 'Code writing or editing activity detected. Please review the current implementation work and ensure it follows best practices. After completing any code work, automatically delegate to the Integration-QA agent for validation.'"
+          }
+        ]
+      },
+      {
+        "matcher": "Bash.*test",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo 'Test execution detected - triggering Integration-QA agent' && claude-code --agent integration --prompt 'Test execution detected. Please perform comprehensive validation of the codebase including code quality, integration compatibility, dependency verification, and testing validation. After completing validation, automatically delegate to Documentation-Writer.'"
+          }
+        ]
+      }
+    ]
   }
 }

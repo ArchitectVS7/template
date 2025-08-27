@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api'
+const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001') + '/api'
 
 export interface User {
   id: string
@@ -61,7 +61,8 @@ class AuthService {
       throw new Error(error.message || 'Login failed')
     }
 
-    const data: AuthResponse = await response.json()
+    const response_data = await response.json()
+    const data: AuthResponse = response_data.data
     this.saveTokensToStorage(data.tokens)
     return data.user
   }
@@ -85,7 +86,8 @@ class AuthService {
       throw new Error(error.message || 'Registration failed')
     }
 
-    const data: AuthResponse = await response.json()
+    const response_data = await response.json()
+    const data: AuthResponse = response_data.data
     this.saveTokensToStorage(data.tokens)
     return data.user
   }
@@ -136,8 +138,8 @@ class AuthService {
       throw new Error('Failed to refresh token')
     }
 
-    const data = await response.json()
-    this.saveTokensToStorage(data.tokens)
+    const response_data = await response.json()
+    this.saveTokensToStorage(response_data.data.tokens)
   }
 
   async logout(): Promise<void> {

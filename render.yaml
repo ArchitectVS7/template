@@ -18,6 +18,10 @@ services:
         generateValue: true
       - key: SESSION_SECRET
         generateValue: true
+      - key: JWT_REFRESH_SECRET
+        generateValue: true
+      - key: ANTHROPIC_API_KEY
+        sync: false
       - key: CORS_ORIGIN
         fromService:
           type: web
@@ -35,6 +39,12 @@ services:
     plan: starter
     buildCommand: cd frontend && npm install && npm run build
     staticPublishPath: ./frontend/dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        fromService:
+          type: web
+          name: ai-dev-mvp-backend
+          property: url
     headers:
       - path: /*
         name: X-Frame-Options

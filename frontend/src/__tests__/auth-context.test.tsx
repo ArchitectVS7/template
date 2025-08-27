@@ -3,30 +3,28 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { AuthProvider, useAuth } from '../contexts/auth-context';
 import React from 'react';
 
-// Mock localStorage
-const mockLocalStorage = {
-  getItem: vi.fn(),
-  setItem: vi.fn(),
-  removeItem: vi.fn(),
-  clear: vi.fn(),
-};
+// Mock the auth service
+vi.mock('../lib/auth', () => ({
+  authService: {
+    isAuthenticated: vi.fn(),
+    getCurrentUser: vi.fn(),
+    login: vi.fn(),
+    logout: vi.fn(),
+  },
+}));
 
-Object.defineProperty(window, 'localStorage', {
-  value: mockLocalStorage,
-});
-
-// Mock fetch
-global.fetch = vi.fn();
+import { authService } from '../lib/auth';
+const mockAuthService = authService as any;
 
 // Test component that uses the auth context
 const TestComponent = () => {
-  const { user, token, login, logout, isLoading } = useAuth();
+  const { user, isAuthenticated, login, logout, isLoading } = useAuth();
   
   return (
     <div>
       <div data-testid="loading">{isLoading ? 'Loading' : 'Not Loading'}</div>
       <div data-testid="user">{user ? user.email : 'No User'}</div>
-      <div data-testid="token">{token ? 'Has Token' : 'No Token'}</div>
+      <div data-testid="token">{isAuthenticated ? 'Has Token' : 'No Token'}</div>
       <button onClick={() => login('test@example.com', 'password')}>
         Login
       </button>
@@ -44,46 +42,42 @@ const AuthProviderWrapper = () => (
 describe('AuthContext', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    mockLocalStorage.getItem.mockReturnValue(null);
+    mockAuthService.isAuthenticated.mockReturnValue(false);
+    mockAuthService.getCurrentUser.mockResolvedValue(null);
+    mockAuthService.login.mockResolvedValue({});
+    mockAuthService.logout.mockResolvedValue();
   });
 
-  it('provides initial state', () => {
+  it('provides initial state when not authenticated', async () => {
     render(<AuthProviderWrapper />);
     
-    expect(screen.getByTestId('loading')).toHaveTextContent('Not Loading');
+    await waitFor(() => {
+      expect(screen.getByTestId('loading')).toHaveTextContent('Not Loading');
+    });
+    
     expect(screen.getByTestId('user')).toHaveTextContent('No User');
     expect(screen.getByTestId('token')).toHaveTextContent('No Token');
   });
 
-  it('loads user from localStorage on mount', async () => {
-    const mockUser = { id: '1', email: 'test@example.com', name: 'Test User' };
-    const mockToken = 'mock-jwt-token';
+  it('loads user when authenticated', async () => {
+    const mockUser = { id: '1', email: 'test@example.com', firstName: 'Test', lastName: 'User' };
     
-    mockLocalStorage.getItem.mockImplementation((key: string) => {
-      if (key === 'auth_user') return JSON.stringify(mockUser);
-      if (key === 'auth_token') return mockToken;
-      return null;
-    });
+    mockAuthService.isAuthenticated.mockReturnValue(true);
+    mockAuthService.getCurrentUser.mockResolvedValue(mockUser);
     
     render(<AuthProviderWrapper />);
     
     await waitFor(() => {
       expect(screen.getByTestId('user')).toHaveTextContent('test@example.com');
       expect(screen.getByTestId('token')).toHaveTextContent('Has Token');
+      expect(screen.getByTestId('loading')).toHaveTextContent('Not Loading');
     });
   });
 
   it('handles successful login', async () => {
-    const mockResponse = {
-      user: { id: '1', email: 'test@example.com', name: 'Test User' },
-      token: 'new-jwt-token',
-      refreshToken: 'new-refresh-token'
-    };
+    const mockUser = { id: '1', email: 'test@example.com', firstName: 'Test', lastName: 'User' };
     
-    (global.fetch as any).mockResolvedValueOnce({
-      ok: true,
-      json: async () => mockResponse,
-    });
+    mockAuthService.login.mockResolvedValue(mockUser);
     
     render(<AuthProviderWrapper />);
     
@@ -93,33 +87,25 @@ describe('AuthContext', () => {
     await waitFor(() => {
       expect(screen.getByTestId('user')).toHaveTextContent('test@example.com');
       expect(screen.getByTestId('token')).toHaveTextContent('Has Token');
+      expect(screen.getByTestId('loading')).toHaveTextContent('Not Loading');
     });
     
-    expect(mockLocalStorage.setItem).toHaveBeenCalledWith(
-      'auth_user',
-      JSON.stringify(mockResponse.user)
-    );
-    expect(mockLocalStorage.setItem).toHaveBeenCalledWith(
-      'auth_token',
-      mockResponse.token
-    );
+    expect(mockAuthService.login).toHaveBeenCalledWith('test@example.com', 'password');
   });
 
   it('handles logout', async () => {
-    const mockUser = { id: '1', email: 'test@example.com', name: 'Test User' };
-    const mockToken = 'mock-jwt-token';
+    const mockUser = { id: '1', email: 'test@example.com', firstName: 'Test', lastName: 'User' };
     
-    mockLocalStorage.getItem.mockImplementation((key: string) => {
-      if (key === 'auth_user') return JSON.stringify(mockUser);
-      if (key === 'auth_token') return mockToken;
-      return null;
-    });
+    // Setup initial authenticated state
+    mockAuthService.isAuthenticated.mockReturnValue(true);
+    mockAuthService.getCurrentUser.mockResolvedValue(mockUser);
     
     render(<AuthProviderWrapper />);
     
     // Wait for initial load
     await waitFor(() => {
       expect(screen.getByTestId('user')).toHaveTextContent('test@example.com');
+      expect(screen.getByTestId('token')).toHaveTextContent('Has Token');
     });
     
     const logoutButton = screen.getByText('Logout');
@@ -128,10 +114,9 @@ describe('AuthContext', () => {
     await waitFor(() => {
       expect(screen.getByTestId('user')).toHaveTextContent('No User');
       expect(screen.getByTestId('token')).toHaveTextContent('No Token');
+      expect(screen.getByTestId('loading')).toHaveTextContent('Not Loading');
     });
     
-    expect(mockLocalStorage.removeItem).toHaveBeenCalledWith('auth_user');
-    expect(mockLocalStorage.removeItem).toHaveBeenCalledWith('auth_token');
-    expect(mockLocalStorage.removeItem).toHaveBeenCalledWith('refresh_token');
+    expect(mockAuthService.logout).toHaveBeenCalled();
   });
 });
