@@ -1,16 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { cn } from '../lib/utils';
-import { 
+import type { 
   LLMModel, 
   LLMConversation, 
   LLMMessage, 
   ChatSettings 
 } from '../types/llm';
-import { llmApi, LLMAPIError } from '../lib/llm-api';
+import { llmApi } from '../lib/llm-api';
 import { useAuth } from '../contexts/auth-context';
 import { Button } from '../components/ui/button';
-import { Card } from '../components/ui/card';
 import ConversationList from '../components/llm/conversation-list';
 import ChatInterface from '../components/llm/chat-interface';
 import ModelSelection from '../components/llm/model-selection';

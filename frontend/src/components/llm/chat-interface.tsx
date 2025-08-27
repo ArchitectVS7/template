@@ -1,9 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { cn } from '../../lib/utils';
-import { LLMMessage, LLMConversation, ChatSettings, StreamChunk } from '../../types/llm';
+import type { LLMMessage, LLMConversation, ChatSettings, StreamChunk } from '../../types/llm';
 import { llmApi, LLMAPIError } from '../../lib/llm-api';
 import { Button } from '../ui/button';
-import { Card } from '../ui/card';
 import { Input } from '../ui/input';
 import MessageBubble from './message-bubble';
 
@@ -98,7 +97,7 @@ export function ChatInterface({
             } : null);
           }
         },
-        async (data) => {
+        async () => {
           // Streaming complete - fetch the final message and conversation
           try {
             const { conversation: updatedConv, messages: updatedMessages } = 

@@ -1,5 +1,5 @@
 import { cn } from '../../lib/utils';
-import { LLMMessage } from '../../types/llm';
+import type { LLMMessage } from '../../types/llm';
 import { Card } from '../ui/card';
 
 interface MessageBubbleProps {

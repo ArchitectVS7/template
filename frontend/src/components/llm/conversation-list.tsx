@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { cn } from '../../lib/utils';
-import { LLMConversation } from '../../types/llm';
+import type { LLMConversation } from '../../types/llm';
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';
 

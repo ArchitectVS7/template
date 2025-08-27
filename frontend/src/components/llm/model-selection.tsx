@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { cn } from '../../lib/utils';
-import { LLMModel, ChatSettings } from '../../types/llm';
+import type { LLMModel, ChatSettings } from '../../types/llm';
 import { Button } from '../ui/button';
 import { Card } from '../ui/card';
 import { Input } from '../ui/input';

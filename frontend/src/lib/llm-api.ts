@@ -1,4 +1,4 @@
-import { 
+import type { 
   LLMModel, 
   LLMConversation, 
   LLMMessage, 
@@ -14,8 +14,11 @@ import {
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
 
 class LLMAPIError extends Error {
-  constructor(public status: number, message: string) {
+  status: number;
+  
+  constructor(status: number, message: string) {
     super(message);
+    this.status = status;
     this.name = 'LLMAPIError';
   }
 }

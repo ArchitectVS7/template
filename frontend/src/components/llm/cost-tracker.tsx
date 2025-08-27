@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { cn } from '../../lib/utils';
-import { UsageStats } from '../../types/llm';
+import type { UsageStats } from '../../types/llm';
 import { Card } from '../ui/card';
 import { Button } from '../ui/button';
 import { llmApi } from '../../lib/llm-api';

@@ -38,7 +38,9 @@
       "Bash(move:*)",
       "Bash(cmd /c:*)",
       "Bash(cp:*)",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(npm run setup:db:*)",
+      "Bash(git log:*)"
     ],
     "deny": [],
     "ask": [],
