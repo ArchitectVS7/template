@@ -3,8 +3,8 @@ services:
     name: ai-dev-mvp-backend
     runtime: node
     plan: starter
-    buildCommand: cd backend && npm install && npm run build
-    startCommand: cd backend && npm start
+    buildCommand: cd backend && npm install && npx prisma generate && npm run build
+    startCommand: cd backend && npx prisma migrate deploy && npm start
     envVars:
       - key: NODE_ENV
         value: production
@@ -32,6 +32,12 @@ services:
           type: web
           name: ai-dev-mvp-frontend
           property: url
+      - key: RATE_LIMIT_WINDOW_MS
+        value: 900000
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: 100
+      - key: ENABLE_REQUEST_LOGGING
+        value: false
 
   - type: web
     name: ai-dev-mvp-frontend
