@@ -42,7 +42,9 @@
       "Bash(npm run setup:db:*)",
       "Bash(git log:*)",
       "Bash(git commit:*)",
-      "Bash(git merge:*)"
+      "Bash(git merge:*)",
+      "Bash(git stash:*)",
+      "Bash(git add:*)"
     ],
     "deny": [],
     "ask": [],
