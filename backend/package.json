@@ -24,6 +24,11 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.60.0",
     "@prisma/client": "^6.14.0",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^24.2.1",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
     "dotenv": "^17.2.1",
@@ -34,16 +39,12 @@
     "jsonwebtoken": "^9.0.2",
     "prisma": "^6.14.0",
     "socket.io": "^4.8.1",
+    "typescript": "^5.9.2",
     "winston": "^3.17.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.33.0",
-    "@types/bcryptjs": "^2.4.6",
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.3",
     "@types/jest": "^29.5.14",
-    "@types/jsonwebtoken": "^9.0.10",
-    "@types/node": "^24.2.1",
     "@types/supertest": "^6.0.2",
     "@typescript-eslint/eslint-plugin": "^8.39.1",
     "@typescript-eslint/parser": "^8.39.1",
@@ -56,7 +57,6 @@
     "ts-jest": "^29.4.1",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.9.2",
     "typescript-eslint": "^8.39.1"
   }
 }
