@@ -1,7 +1,6 @@
 import request from 'supertest';
 import { app } from '../index';
 import { db } from '../services/database';
-import { AuthService } from '../services/auth';
 
 describe('LLM API Endpoints', () => {
   let authToken: string;
@@ -14,7 +13,7 @@ describe('LLM API Endpoints', () => {
       email: 'llm-test@example.com',
       password: 'TestPassword123!',
       firstName: 'LLM',
-      lastName: 'Test'
+      lastName: 'Test',
     };
 
     // Register user
@@ -30,7 +29,7 @@ describe('LLM API Endpoints', () => {
     // Clean up test data
     if (userId) {
       await db.prisma.user.delete({
-        where: { id: userId }
+        where: { id: userId },
       });
     }
     await db.disconnect();
@@ -43,7 +42,7 @@ describe('LLM API Endpoints', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           title: 'Test Conversation',
-          model: 'claude-3-haiku-20240307'
+          model: 'claude-3-haiku-20240307',
         });
 
       expect(response.status).toBe(201);
@@ -51,7 +50,7 @@ describe('LLM API Endpoints', () => {
       expect(response.body.data).toHaveProperty('id');
       expect(response.body.data.title).toBe('Test Conversation');
       expect(response.body.data.model).toBe('claude-3-haiku-20240307');
-      
+
       conversationId = response.body.data.id;
     });
 
@@ -60,7 +59,7 @@ describe('LLM API Endpoints', () => {
         .post('/api/llm/conversations')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          title: 'Default Model Test'
+          title: 'Default Model Test',
         });
 
       expect(response.status).toBe(201);
@@ -68,11 +67,9 @@ describe('LLM API Endpoints', () => {
     });
 
     it('should require authentication', async () => {
-      const response = await request(app)
-        .post('/api/llm/conversations')
-        .send({
-          title: 'Unauthorized Test'
-        });
+      const response = await request(app).post('/api/llm/conversations').send({
+        title: 'Unauthorized Test',
+      });
 
       expect(response.status).toBe(401);
     });
@@ -83,7 +80,7 @@ describe('LLM API Endpoints', () => {
         .set('Authorization', `Bearer ${authToken}`)
         .send({
           title: 'Invalid Model Test',
-          model: 'invalid-model'
+          model: 'invalid-model',
         });
 
       expect(response.status).toBe(400);
@@ -113,8 +110,7 @@ describe('LLM API Endpoints', () => {
     });
 
     it('should require authentication', async () => {
-      const response = await request(app)
-        .get('/api/llm/conversations');
+      const response = await request(app).get('/api/llm/conversations');
 
       expect(response.status).toBe(401);
     });
@@ -142,8 +138,9 @@ describe('LLM API Endpoints', () => {
     });
 
     it('should require authentication', async () => {
-      const response = await request(app)
-        .get(`/api/llm/conversations/${conversationId}`);
+      const response = await request(app).get(
+        `/api/llm/conversations/${conversationId}`
+      );
 
       expect(response.status).toBe(401);
     });
@@ -194,7 +191,7 @@ describe('LLM API Endpoints', () => {
       const response = await request(app)
         .post(`/api/llm/conversations/${conversationId}/messages`)
         .send({
-          content: 'Test message'
+          content: 'Test message',
         });
 
       expect(response.status).toBe(401);
@@ -205,7 +202,7 @@ describe('LLM API Endpoints', () => {
         .post('/api/llm/conversations/non-existent-id/messages')
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          content: 'Test message'
+          content: 'Test message',
         });
 
       expect(response.status).toBe(404);
@@ -219,7 +216,7 @@ describe('LLM API Endpoints', () => {
         .put(`/api/llm/conversations/${conversationId}`)
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          title: newTitle
+          title: newTitle,
         });
 
       expect(response.status).toBe(200);
@@ -232,7 +229,7 @@ describe('LLM API Endpoints', () => {
         .put(`/api/llm/conversations/${conversationId}`)
         .set('Authorization', `Bearer ${authToken}`)
         .send({
-          title: '' // Empty title should fail
+          title: '', // Empty title should fail
         });
 
       expect(response.status).toBe(400);
@@ -242,7 +239,7 @@ describe('LLM API Endpoints', () => {
       const response = await request(app)
         .put(`/api/llm/conversations/${conversationId}`)
         .send({
-          title: 'New Title'
+          title: 'New Title',
         });
 
       expect(response.status).toBe(401);
@@ -251,8 +248,9 @@ describe('LLM API Endpoints', () => {
 
   describe('DELETE /api/llm/conversations/:id', () => {
     it('should require authentication', async () => {
-      const response = await request(app)
-        .delete(`/api/llm/conversations/${conversationId}`);
+      const response = await request(app).delete(
+        `/api/llm/conversations/${conversationId}`
+      );
 
       expect(response.status).toBe(401);
     });
@@ -299,8 +297,7 @@ describe('LLM API Endpoints', () => {
     });
 
     it('should require authentication', async () => {
-      const response = await request(app)
-        .get('/api/llm/usage');
+      const response = await request(app).get('/api/llm/usage');
 
       expect(response.status).toBe(401);
     });
@@ -316,7 +313,7 @@ describe('LLM API Endpoints', () => {
       expect(response.body.success).toBe(true);
       expect(Array.isArray(response.body.data)).toBe(true);
       expect(response.body.data.length).toBeGreaterThan(0);
-      
+
       // Check model structure
       const model = response.body.data[0];
       expect(model).toHaveProperty('id');
@@ -327,8 +324,7 @@ describe('LLM API Endpoints', () => {
     });
 
     it('should require authentication', async () => {
-      const response = await request(app)
-        .get('/api/llm/models');
+      const response = await request(app).get('/api/llm/models');
 
       expect(response.status).toBe(401);
     });

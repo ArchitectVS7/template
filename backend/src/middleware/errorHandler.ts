@@ -24,7 +24,7 @@ export const errorHandler = (
     url: req.url,
     ip: req.ip,
     userAgent: req.get('User-Agent'),
-    stack: error.stack
+    stack: error.stack,
   });
 
   // Send error response
@@ -32,11 +32,14 @@ export const errorHandler = (
     success: false,
     error: message,
     ...(error.validationErrors && { validationErrors: error.validationErrors }),
-    ...(process.env.NODE_ENV === 'development' && { stack: error.stack })
+    ...(process.env.NODE_ENV === 'development' && { stack: error.stack }),
   });
 };
 
-export const createError = (message: string, statusCode: number = 500): AppError => {
+export const createError = (
+  message: string,
+  statusCode: number = 500
+): AppError => {
   const error = new Error(message) as AppError;
   error.statusCode = statusCode;
   error.isOperational = true;

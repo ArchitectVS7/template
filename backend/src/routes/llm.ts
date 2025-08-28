@@ -4,7 +4,6 @@ import rateLimit from 'express-rate-limit';
 import { authenticateToken } from '../middleware/auth';
 import { createError } from '../middleware/errorHandler';
 import { llmService } from '../services/llm';
-import { logger } from '../utils/logger';
 
 const router = express.Router();
 
@@ -30,10 +29,17 @@ router.use(llmRateLimit);
 router.use(authenticateToken);
 
 // Validation middleware
-const handleValidationErrors = (req: Request, res: Response, next: NextFunction) => {
+const handleValidationErrors = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    const errorMessages = errors.array().map(error => error.msg).join(', ');
+    const errorMessages = errors
+      .array()
+      .map(error => error.msg)
+      .join(', ');
     return next(createError(`Validation error: ${errorMessages}`, 400));
   }
   next();
@@ -46,22 +52,36 @@ const handleValidationErrors = (req: Request, res: Response, next: NextFunction)
 router.post(
   '/conversations',
   [
-    body('title').optional().isString().isLength({ min: 1, max: 200 })
+    body('title')
+      .optional()
+      .isString()
+      .isLength({ min: 1, max: 200 })
       .withMessage('Title must be a string between 1 and 200 characters'),
-    body('model').optional().isString().isIn([
-      'claude-3-opus-20240229',
-      'claude-3-sonnet-20240229',
-      'claude-3-haiku-20240307',
-      'claude-3-5-sonnet-20241022'
-    ]).withMessage('Invalid model specified'),
+    body('model')
+      .optional()
+      .isString()
+      .isIn([
+        'claude-3-opus-20240229',
+        'claude-3-sonnet-20240229',
+        'claude-3-haiku-20240307',
+        'claude-3-5-sonnet-20241022',
+      ])
+      .withMessage('Invalid model specified'),
   ],
   handleValidationErrors,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { title, model } = req.body;
-      const userId = req.user!.id;
+      const userId = req.user?.id;
+      if (!userId) {
+        throw createError('User authentication required', 401);
+      }
 
-      const conversation = await llmService.createConversation(userId, title, model);
+      const conversation = await llmService.createConversation(
+        userId,
+        title,
+        model
+      );
 
       res.status(201).json({
         success: true,
@@ -80,19 +100,30 @@ router.post(
 router.get(
   '/conversations',
   [
-    query('limit').optional().isInt({ min: 1, max: 100 })
+    query('limit')
+      .optional()
+      .isInt({ min: 1, max: 100 })
       .withMessage('Limit must be between 1 and 100'),
-    query('offset').optional().isInt({ min: 0 })
+    query('offset')
+      .optional()
+      .isInt({ min: 0 })
       .withMessage('Offset must be a non-negative integer'),
   ],
   handleValidationErrors,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = req.user!.id;
+      const userId = req.user?.id;
+      if (!userId) {
+        throw createError('User authentication required', 401);
+      }
       const limit = parseInt(req.query.limit as string) || 50;
       const offset = parseInt(req.query.offset as string) || 0;
 
-      const conversations = await llmService.getUserConversations(userId, limit, offset);
+      const conversations = await llmService.getUserConversations(
+        userId,
+        limit,
+        offset
+      );
 
       res.json({
         success: true,
@@ -116,19 +147,22 @@ router.get(
 router.get(
   '/conversations/:conversationId',
   [
-    param('conversationId').isString().isLength({ min: 1 })
+    param('conversationId')
+      .isString()
+      .isLength({ min: 1 })
       .withMessage('Conversation ID is required'),
   ],
   handleValidationErrors,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { conversationId } = req.params;
-      const userId = req.user!.id;
+      const userId = req.user?.id;
+      if (!userId) {
+        throw createError('User authentication required', 401);
+      }
 
-      const { conversation, messages } = await llmService.getConversationMessages(
-        conversationId,
-        userId
-      );
+      const { conversation, messages } =
+        await llmService.getConversationMessages(conversationId, userId);
 
       res.json({
         success: true,
@@ -151,25 +185,42 @@ router.post(
   '/conversations/:conversationId/messages',
   chatRateLimit,
   [
-    param('conversationId').isString().isLength({ min: 1 })
+    param('conversationId')
+      .isString()
+      .isLength({ min: 1 })
       .withMessage('Conversation ID is required'),
-    body('content').isString().isLength({ min: 1, max: 10000 })
+    body('content')
+      .isString()
+      .isLength({ min: 1, max: 10000 })
       .withMessage('Message content must be between 1 and 10000 characters'),
-    body('temperature').optional().isFloat({ min: 0, max: 2 })
+    body('temperature')
+      .optional()
+      .isFloat({ min: 0, max: 2 })
       .withMessage('Temperature must be between 0 and 2'),
-    body('maxTokens').optional().isInt({ min: 1, max: 8192 })
+    body('maxTokens')
+      .optional()
+      .isInt({ min: 1, max: 8192 })
       .withMessage('Max tokens must be between 1 and 8192'),
-    body('systemPrompt').optional().isString().isLength({ max: 2000 })
+    body('systemPrompt')
+      .optional()
+      .isString()
+      .isLength({ max: 2000 })
       .withMessage('System prompt must be at most 2000 characters'),
-    body('stream').optional().isBoolean()
+    body('stream')
+      .optional()
+      .isBoolean()
       .withMessage('Stream must be a boolean'),
   ],
   handleValidationErrors,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { conversationId } = req.params;
-      const { content, temperature, maxTokens, systemPrompt, stream } = req.body;
-      const userId = req.user!.id;
+      const { content, temperature, maxTokens, systemPrompt, stream } =
+        req.body;
+      const userId = req.user?.id;
+      if (!userId) {
+        throw createError('User authentication required', 401);
+      }
 
       const options = {
         temperature,
@@ -182,11 +233,11 @@ router.post(
         res.writeHead(200, {
           'Content-Type': 'text/event-stream',
           'Cache-Control': 'no-cache',
-          'Connection': 'keep-alive',
+          Connection: 'keep-alive',
           'Access-Control-Allow-Origin': '*',
         });
 
-        let responseData: any;
+        let responseData: { conversationId: string; messageId: string };
 
         try {
           responseData = await llmService.sendStreamingMessage(
@@ -196,22 +247,30 @@ router.post(
             options,
             (chunk: string) => {
               // Send chunk as SSE
-              res.write(`data: ${JSON.stringify({ type: 'chunk', content: chunk })}\n\n`);
+              res.write(
+                `data: ${JSON.stringify({ type: 'chunk', content: chunk })}\n\n`
+              );
             }
           );
 
           // Send completion event
-          res.write(`data: ${JSON.stringify({ 
-            type: 'complete', 
-            conversationId: responseData.conversationId,
-            messageId: responseData.messageId 
-          })}\n\n`);
-          
+          res.write(
+            `data: ${JSON.stringify({
+              type: 'complete',
+              conversationId: responseData.conversationId,
+              messageId: responseData.messageId,
+            })}\n\n`
+          );
         } catch (streamError) {
-          res.write(`data: ${JSON.stringify({ 
-            type: 'error', 
-            error: streamError instanceof Error ? streamError.message : 'Stream failed' 
-          })}\n\n`);
+          res.write(
+            `data: ${JSON.stringify({
+              type: 'error',
+              error:
+                streamError instanceof Error
+                  ? streamError.message
+                  : 'Stream failed',
+            })}\n\n`
+          );
         }
 
         res.end();
@@ -244,9 +303,13 @@ router.post(
 router.put(
   '/conversations/:conversationId',
   [
-    param('conversationId').isString().isLength({ min: 1 })
+    param('conversationId')
+      .isString()
+      .isLength({ min: 1 })
       .withMessage('Conversation ID is required'),
-    body('title').isString().isLength({ min: 1, max: 200 })
+    body('title')
+      .isString()
+      .isLength({ min: 1, max: 200 })
       .withMessage('Title must be between 1 and 200 characters'),
   ],
   handleValidationErrors,
@@ -254,7 +317,10 @@ router.put(
     try {
       const { conversationId } = req.params;
       const { title } = req.body;
-      const userId = req.user!.id;
+      const userId = req.user?.id;
+      if (!userId) {
+        throw createError('User authentication required', 401);
+      }
 
       const conversation = await llmService.updateConversationTitle(
         conversationId,
@@ -279,14 +345,19 @@ router.put(
 router.delete(
   '/conversations/:conversationId',
   [
-    param('conversationId').isString().isLength({ min: 1 })
+    param('conversationId')
+      .isString()
+      .isLength({ min: 1 })
       .withMessage('Conversation ID is required'),
   ],
   handleValidationErrors,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { conversationId } = req.params;
-      const userId = req.user!.id;
+      const userId = req.user?.id;
+      if (!userId) {
+        throw createError('User authentication required', 401);
+      }
 
       await llmService.deleteConversation(conversationId, userId);
 
@@ -307,13 +378,18 @@ router.delete(
 router.get(
   '/usage',
   [
-    query('days').optional().isInt({ min: 1, max: 365 })
+    query('days')
+      .optional()
+      .isInt({ min: 1, max: 365 })
       .withMessage('Days must be between 1 and 365'),
   ],
   handleValidationErrors,
   async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const userId = req.user!.id;
+      const userId = req.user?.id;
+      if (!userId) {
+        throw createError('User authentication required', 401);
+      }
       const days = parseInt(req.query.days as string) || 30;
 
       const stats = await llmService.getUserUsageStats(userId, days);
@@ -341,24 +417,24 @@ router.get(
           id: 'claude-3-opus-20240229',
           name: 'Claude 3 Opus',
           description: 'Most capable model for complex tasks',
-          inputCost: 15.00,
-          outputCost: 75.00,
+          inputCost: 15.0,
+          outputCost: 75.0,
           maxTokens: 4096,
         },
         {
           id: 'claude-3-sonnet-20240229',
           name: 'Claude 3 Sonnet',
           description: 'Balanced performance and speed',
-          inputCost: 3.00,
-          outputCost: 15.00,
+          inputCost: 3.0,
+          outputCost: 15.0,
           maxTokens: 4096,
         },
         {
           id: 'claude-3-5-sonnet-20241022',
           name: 'Claude 3.5 Sonnet',
           description: 'Latest balanced model with improved capabilities',
-          inputCost: 3.00,
-          outputCost: 15.00,
+          inputCost: 3.0,
+          outputCost: 15.0,
           maxTokens: 8192,
         },
         {

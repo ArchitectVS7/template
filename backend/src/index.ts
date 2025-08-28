@@ -24,9 +24,9 @@ const app = express();
 const server = createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: process.env.FRONTEND_URL || "http://localhost:5173",
-    methods: ["GET", "POST"]
-  }
+    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
+    methods: ['GET', 'POST'],
+  },
 });
 
 const PORT = process.env.PORT || 3000;
@@ -34,32 +34,41 @@ const PORT = process.env.PORT || 3000;
 // Rate limiting
 const limiter = rateLimit({
   windowMs: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '900000'), // 15 minutes
-  max: parseInt(process.env.RATE_LIMIT_MAX_REQUESTS || process.env.RATE_LIMIT_MAX || '100'), // support both env names
-  message: 'Too many requests from this IP, please try again later.'
+  max: parseInt(
+    process.env.RATE_LIMIT_MAX_REQUESTS || process.env.RATE_LIMIT_MAX || '100'
+  ), // support both env names
+  message: 'Too many requests from this IP, please try again later.',
 });
 
 // Middleware
-app.use(helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "https:"],
+app.use(
+  helmet({
+    contentSecurityPolicy: {
+      directives: {
+        defaultSrc: ["'self'"],
+        styleSrc: ["'self'", "'unsafe-inline'"],
+        scriptSrc: ["'self'"],
+        imgSrc: ["'self'", 'data:', 'https:'],
+      },
     },
-  },
-}));
+  })
+);
 
-app.use(cors({
-  origin: process.env.CORS_ORIGIN || "http://localhost:5173",
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+    credentials: true,
+  })
+);
 
 app.use(limiter);
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 // Enable request logging if env flag is true (avoids noisy logs in prod/tests)
-if ((process.env.ENABLE_REQUEST_LOGGING || 'true').toString().toLowerCase() === 'true') {
+if (
+  (process.env.ENABLE_REQUEST_LOGGING || 'true').toString().toLowerCase() ===
+  'true'
+) {
   app.use(requestLogger);
 }
 
@@ -78,8 +87,12 @@ app.use(errorHandler);
 
 server.listen(PORT, () => {
   logger.info(`🚀 Server running on port ${PORT}`);
-  logger.info(`📊 Health check available at: http://localhost:${PORT}/api/health`);
-  logger.info(`🔒 CORS enabled for: ${process.env.CORS_ORIGIN || "http://localhost:5173"}`);
+  logger.info(
+    `📊 Health check available at: http://localhost:${PORT}/api/health`
+  );
+  logger.info(
+    `🔒 CORS enabled for: ${process.env.CORS_ORIGIN || 'http://localhost:5173'}`
+  );
 });
 
 export { app, server, io };

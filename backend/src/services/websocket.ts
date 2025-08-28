@@ -17,24 +17,24 @@ class WebSocketService {
   }
 
   private setupEventHandlers() {
-    this.io.on('connection', (socket) => {
+    this.io.on('connection', socket => {
       logger.info('WebSocket client connected:', { socketId: socket.id });
 
       // Add client to connected clients
       this.connectedClients.set(socket.id, {
         id: socket.id,
-        joinedAt: new Date()
+        joinedAt: new Date(),
       });
 
       // Handle authentication
-      socket.on('authenticate', (data) => {
+      socket.on('authenticate', data => {
         const client = this.connectedClients.get(socket.id);
         if (client && data.userId) {
           client.userId = data.userId;
           socket.join(`user_${data.userId}`);
-          logger.info('WebSocket client authenticated:', { 
-            socketId: socket.id, 
-            userId: data.userId 
+          logger.info('WebSocket client authenticated:', {
+            socketId: socket.id,
+            userId: data.userId,
           });
         }
       });
@@ -57,36 +57,36 @@ class WebSocketService {
       });
 
       // Handle disconnection
-      socket.on('disconnect', (reason) => {
-        logger.info('WebSocket client disconnected:', { 
-          socketId: socket.id, 
-          reason 
+      socket.on('disconnect', reason => {
+        logger.info('WebSocket client disconnected:', {
+          socketId: socket.id,
+          reason,
         });
         this.connectedClients.delete(socket.id);
       });
 
       // Handle errors
-      socket.on('error', (error) => {
-        logger.error('WebSocket error:', { 
-          socketId: socket.id, 
-          error: error.message 
+      socket.on('error', error => {
+        logger.error('WebSocket error:', {
+          socketId: socket.id,
+          error: error.message,
         });
       });
     });
   }
 
   // Broadcast to all connected clients
-  public broadcast(event: string, data: any) {
+  public broadcast(event: string, data: unknown) {
     this.io.emit(event, data);
   }
 
   // Send to specific user
-  public sendToUser(userId: string, event: string, data: any) {
+  public sendToUser(userId: string, event: string, data: unknown) {
     this.io.to(`user_${userId}`).emit(event, data);
   }
 
   // Send to debug room (admin users)
-  public sendToDebugRoom(event: string, data: any) {
+  public sendToDebugRoom(event: string, data: unknown) {
     this.io.to('debug_room').emit(event, data);
   }
 
@@ -101,7 +101,7 @@ class WebSocketService {
   }
 
   // Send new log entry to debug room
-  public broadcastLogEntry(logEntry: any) {
+  public broadcastLogEntry(logEntry: unknown) {
     this.sendToDebugRoom('new_log', logEntry);
   }
 
@@ -109,18 +109,19 @@ class WebSocketService {
   public getConnectionStats() {
     const now = new Date();
     const clients = Array.from(this.connectedClients.values());
-    
+
     return {
       totalConnections: clients.length,
       authenticatedConnections: clients.filter(c => c.userId).length,
-      averageConnectionTime: clients.reduce((sum, client) => {
-        return sum + (now.getTime() - client.joinedAt.getTime());
-      }, 0) / clients.length || 0,
+      averageConnectionTime:
+        clients.reduce((sum, client) => {
+          return sum + (now.getTime() - client.joinedAt.getTime());
+        }, 0) / clients.length || 0,
       connections: clients.map(client => ({
         id: client.id,
         userId: client.userId,
-        connectedFor: now.getTime() - client.joinedAt.getTime()
-      }))
+        connectedFor: now.getTime() - client.joinedAt.getTime(),
+      })),
     };
   }
 }

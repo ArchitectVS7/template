@@ -17,10 +17,13 @@ interface AuthTokens {
 }
 
 export class AuthService {
-  private static readonly JWT_SECRET = process.env.JWT_SECRET || 'your-super-secure-jwt-secret';
-  private static readonly JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'your-refresh-secret';
+  private static readonly JWT_SECRET =
+    process.env.JWT_SECRET || 'your-super-secure-jwt-secret';
+  private static readonly JWT_REFRESH_SECRET =
+    process.env.JWT_REFRESH_SECRET || 'your-refresh-secret';
   private static readonly JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '1h';
-  private static readonly JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || '7d';
+  private static readonly JWT_REFRESH_EXPIRES_IN =
+    process.env.JWT_REFRESH_EXPIRES_IN || '7d';
   private static readonly BCRYPT_ROUNDS = 12;
 
   /**
@@ -33,7 +36,10 @@ export class AuthService {
   /**
    * Verify password against hash
    */
-  static async verifyPassword(password: string, hashedPassword: string): Promise<boolean> {
+  static async verifyPassword(
+    password: string,
+    hashedPassword: string
+  ): Promise<boolean> {
     return bcrypt.compare(password, hashedPassword);
   }
 
@@ -138,7 +144,10 @@ export class AuthService {
     // Create session record
     await this.createSession(user.id, tokens.refreshToken);
 
-    logger.info('User registered successfully:', { userId: user.id, email: user.email });
+    logger.info('User registered successfully:', {
+      userId: user.id,
+      email: user.email,
+    });
 
     return { user, tokens };
   }
@@ -164,7 +173,10 @@ export class AuthService {
     }
 
     // Verify password
-    const isValidPassword = await this.verifyPassword(userPassword, user.password);
+    const isValidPassword = await this.verifyPassword(
+      userPassword,
+      user.password
+    );
     if (!isValidPassword) {
       throw createError('Invalid credentials', 401);
     }
@@ -177,16 +189,21 @@ export class AuthService {
     });
 
     // Create session record
-    await this.createSession(user.id, tokens.refreshToken, userAgent, ipAddress);
+    await this.createSession(
+      user.id,
+      tokens.refreshToken,
+      userAgent,
+      ipAddress
+    );
 
     // Remove password from response
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { password: _, ...userWithoutPassword } = user;
 
-    logger.info('User logged in successfully:', { 
-      userId: user.id, 
+    logger.info('User logged in successfully:', {
+      userId: user.id,
       email: user.email,
-      ip: ipAddress 
+      ip: ipAddress,
     });
 
     return { user: userWithoutPassword, tokens };
@@ -240,7 +257,10 @@ export class AuthService {
   /**
    * Logout user (invalidate session)
    */
-  static async logoutUser(userId: string, refreshToken?: string): Promise<void> {
+  static async logoutUser(
+    userId: string,
+    refreshToken?: string
+  ): Promise<void> {
     if (refreshToken) {
       // Invalidate specific session
       await db.prisma.session.updateMany({
@@ -298,7 +318,9 @@ export class AuthService {
   /**
    * Get user by ID (for middleware)
    */
-  static async getUserById(userId: string): Promise<Omit<User, 'password'> | null> {
+  static async getUserById(
+    userId: string
+  ): Promise<Omit<User, 'password'> | null> {
     const user = await db.prisma.user.findUnique({
       where: { id: userId },
       select: {
@@ -319,25 +341,44 @@ export class AuthService {
   /**
    * Validate password strength
    */
-  static validatePassword(password: string): { valid: boolean; message?: string } {
+  static validatePassword(password: string): {
+    valid: boolean;
+    message?: string;
+  } {
     if (password.length < 8) {
-      return { valid: false, message: 'Password must be at least 8 characters long' };
+      return {
+        valid: false,
+        message: 'Password must be at least 8 characters long',
+      };
     }
 
     if (!/(?=.*[a-z])/.test(password)) {
-      return { valid: false, message: 'Password must contain at least one lowercase letter' };
+      return {
+        valid: false,
+        message: 'Password must contain at least one lowercase letter',
+      };
     }
 
     if (!/(?=.*[A-Z])/.test(password)) {
-      return { valid: false, message: 'Password must contain at least one uppercase letter' };
+      return {
+        valid: false,
+        message: 'Password must contain at least one uppercase letter',
+      };
     }
 
     if (!/(?=.*\d)/.test(password)) {
-      return { valid: false, message: 'Password must contain at least one number' };
+      return {
+        valid: false,
+        message: 'Password must contain at least one number',
+      };
     }
 
     if (!/(?=.*[@$!%*?&])/.test(password)) {
-      return { valid: false, message: 'Password must contain at least one special character (@$!%*?&)' };
+      return {
+        valid: false,
+        message:
+          'Password must contain at least one special character (@$!%*?&)',
+      };
     }
 
     return { valid: true };
@@ -348,7 +389,7 @@ export class AuthService {
    */
   static validateEmail(email: string): { valid: boolean; message?: string } {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    
+
     if (!emailRegex.test(email)) {
       return { valid: false, message: 'Invalid email format' };
     }
@@ -410,7 +451,10 @@ export class AuthService {
     }
 
     // Verify current password
-    const isValidPassword = await this.verifyPassword(currentPassword, user.password);
+    const isValidPassword = await this.verifyPassword(
+      currentPassword,
+      user.password
+    );
     if (!isValidPassword) {
       throw createError('Current password is incorrect', 401);
     }
@@ -451,16 +495,18 @@ export class AuthService {
   /**
    * Get user sessions
    */
-  static async getUserSessions(userId: string): Promise<Array<{
-    id: string;
-    createdAt: Date;
-    updatedAt: Date;
-    expiresAt: Date;
-    userAgent?: string | null;
-    ipAddress?: string | null;
-    isActive: boolean;
-    isCurrent?: boolean;
-  }>> {
+  static async getUserSessions(userId: string): Promise<
+    Array<{
+      id: string;
+      createdAt: Date;
+      updatedAt: Date;
+      expiresAt: Date;
+      userAgent?: string | null;
+      ipAddress?: string | null;
+      isActive: boolean;
+      isCurrent?: boolean;
+    }>
+  > {
     const sessions = await db.prisma.session.findMany({
       where: { userId },
       orderBy: { createdAt: 'desc' },

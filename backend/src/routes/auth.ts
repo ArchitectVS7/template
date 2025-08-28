@@ -2,7 +2,12 @@ import { Router, Request, Response, NextFunction } from 'express';
 import rateLimit from 'express-rate-limit';
 import { AuthService } from '../services/auth';
 import { authenticateToken, authRateLimit } from '../middleware/auth';
-import { validate, validationRules, sanitizeInput, requireJsonBody } from '../middleware/validation';
+import {
+  validate,
+  validationRules,
+  sanitizeInput,
+  requireJsonBody,
+} from '../middleware/validation';
 import { createError } from '../middleware/errorHandler';
 import { debugLogService } from '../services/debugLog';
 import { LogLevel } from '@prisma/client';
@@ -106,17 +111,19 @@ router.post(
       });
     } catch (error) {
       // Log failed login attempt
-      await debugLogService.logEvent({
-        level: LogLevel.WARN,
-        message: `Failed login attempt: ${req.body.email || 'unknown'}`,
-        component: 'AUTH',
-        metadata: {
-          email: req.body.email,
-          ip: req.ip,
-          userAgent: req.get('User-Agent'),
-        },
-      }).catch(() => {}); // Don't let logging errors affect the response
-      
+      await debugLogService
+        .logEvent({
+          level: LogLevel.WARN,
+          message: `Failed login attempt: ${req.body.email || 'unknown'}`,
+          component: 'AUTH',
+          metadata: {
+            email: req.body.email,
+            ip: req.ip,
+            userAgent: req.get('User-Agent'),
+          },
+        })
+        .catch(() => {}); // Don't let logging errors affect the response
+
       next(error);
     }
   }
@@ -127,9 +134,7 @@ router.post(
   '/refresh',
   rateLimit(authRateLimit.refresh),
   requireJsonBody,
-  validate([
-    { field: 'refreshToken', required: true, type: 'string' },
-  ]),
+  validate([{ field: 'refreshToken', required: true, type: 'string' }]),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { refreshToken } = req.body;
@@ -155,7 +160,7 @@ router.post(
     try {
       const refreshToken = req.body.refreshToken;
       const user = requireUser(req);
-      
+
       await AuthService.logoutUser(user.id, refreshToken);
 
       // Log successful logout

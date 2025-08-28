@@ -44,14 +44,14 @@ export const authenticateToken = async (
 
     // Get fresh user data
     const user = await AuthService.getUserById(payload.userId);
-    
+
     if (!user || !user.isActive) {
       throw createError('User not found or inactive', 401);
     }
 
     // Attach user to request
     req.user = user;
-    
+
     next();
   } catch (error) {
     logger.error('Authentication failed:', {
@@ -60,7 +60,7 @@ export const authenticateToken = async (
       userAgent: req.get('User-Agent'),
       endpoint: req.path,
     });
-    
+
     next(error);
   }
 };
@@ -80,12 +80,12 @@ export const authenticateOptional = async (
     if (token) {
       const payload = AuthService.verifyAccessToken(token);
       const user = await AuthService.getUserById(payload.userId);
-      
+
       if (user && user.isActive) {
         req.user = user;
       }
     }
-    
+
     next();
   } catch {
     // Don't fail for optional auth - just continue without user
@@ -110,7 +110,7 @@ export const requireRole = (...allowedRoles: UserRole[]) => {
         endpoint: req.path,
         ip: req.ip,
       });
-      
+
       return next(createError('Insufficient permissions', 403));
     }
 
@@ -138,8 +138,11 @@ export const requireSelfOrAdmin = (userIdParam: string = 'userId') => {
       return next(createError('Authentication required', 401));
     }
 
-    const targetUserId = req.params[userIdParam] || req.body.userId || req.query.userId;
-    const isAdmin = req.user.role === UserRole.ADMIN || req.user.role === UserRole.SUPER_ADMIN;
+    const targetUserId =
+      req.params[userIdParam] || req.body.userId || req.query.userId;
+    const isAdmin =
+      req.user.role === UserRole.ADMIN ||
+      req.user.role === UserRole.SUPER_ADMIN;
     const isSelf = req.user.id === targetUserId;
 
     if (!isSelf && !isAdmin) {
@@ -150,7 +153,7 @@ export const requireSelfOrAdmin = (userIdParam: string = 'userId') => {
         endpoint: req.path,
         ip: req.ip,
       });
-      
+
       return next(createError('Access denied', 403));
     }
 
@@ -170,7 +173,7 @@ export const authRateLimit = {
     standardHeaders: true,
     legacyHeaders: false,
   },
-  
+
   // Moderate rate limiting for registration
   register: {
     windowMs: 60 * 60 * 1000, // 1 hour
@@ -179,7 +182,7 @@ export const authRateLimit = {
     standardHeaders: true,
     legacyHeaders: false,
   },
-  
+
   // Lenient rate limiting for token refresh
   refresh: {
     windowMs: 15 * 60 * 1000, // 15 minutes

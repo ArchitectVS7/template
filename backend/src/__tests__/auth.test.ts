@@ -13,9 +13,9 @@ app.use(errorHandler);
 const prisma = new PrismaClient({
   datasources: {
     db: {
-      url: 'file:./test.db'
-    }
-  }
+      url: 'file:./test.db',
+    },
+  },
 });
 
 describe('Authentication API', () => {
@@ -35,7 +35,7 @@ describe('Authentication API', () => {
         email: 'test@example.com',
         password: 'Password123!',
         firstName: 'Test',
-        lastName: 'User'
+        lastName: 'User',
       };
 
       const response = await request(app)
@@ -43,7 +43,10 @@ describe('Authentication API', () => {
         .send(userData)
         .expect(201);
 
-      expect(response.body).toHaveProperty('message', 'User registered successfully');
+      expect(response.body).toHaveProperty(
+        'message',
+        'User registered successfully'
+      );
       expect(response.body).toHaveProperty('data');
       expect(response.body.data).toHaveProperty('user');
       expect(response.body.data.user.email).toBe(userData.email);
@@ -57,13 +60,11 @@ describe('Authentication API', () => {
         email: 'test@example.com',
         password: 'Password123!',
         firstName: 'Test',
-        lastName: 'User'
+        lastName: 'User',
       };
 
       // Create user first
-      await request(app)
-        .post('/api/auth/register')
-        .send(userData);
+      await request(app).post('/api/auth/register').send(userData);
 
       // Try to register again with same email
       const response = await request(app)
@@ -94,8 +95,8 @@ describe('Authentication API', () => {
           password: hashedPassword,
           firstName: 'Test',
           lastName: 'User',
-          role: 'USER'
-        }
+          role: 'USER',
+        },
       });
     });
 
@@ -104,7 +105,7 @@ describe('Authentication API', () => {
         .post('/api/auth/login')
         .send({
           email: 'test@example.com',
-          password: 'Password123!'
+          password: 'Password123!',
         })
         .expect(200);
 
@@ -121,7 +122,7 @@ describe('Authentication API', () => {
         .post('/api/auth/login')
         .send({
           email: 'test@example.com',
-          password: 'wrongpassword'
+          password: 'wrongpassword',
         })
         .expect(401);
 
@@ -133,7 +134,7 @@ describe('Authentication API', () => {
         .post('/api/auth/login')
         .send({
           email: 'nonexistent@example.com',
-          password: 'Password123!'
+          password: 'Password123!',
         })
         .expect(401);
 
@@ -153,16 +154,14 @@ describe('Authentication API', () => {
           password: hashedPassword,
           firstName: 'Test',
           lastName: 'User',
-          role: 'USER'
-        }
+          role: 'USER',
+        },
       });
 
-      const loginResponse = await request(app)
-        .post('/api/auth/login')
-        .send({
-          email: 'test@example.com',
-          password: 'Password123!'
-        });
+      const loginResponse = await request(app).post('/api/auth/login').send({
+        email: 'test@example.com',
+        password: 'Password123!',
+      });
 
       refreshToken = loginResponse.body.data.tokens.refreshToken;
     });

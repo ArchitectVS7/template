@@ -21,10 +21,10 @@ interface StreamResponse {
 
 // Anthropic pricing per 1M tokens (as of 2024)
 const ANTHROPIC_PRICING = {
-  'claude-3-opus-20240229': { input: 15.00, output: 75.00 },
-  'claude-3-sonnet-20240229': { input: 3.00, output: 15.00 },
+  'claude-3-opus-20240229': { input: 15.0, output: 75.0 },
+  'claude-3-sonnet-20240229': { input: 3.0, output: 15.0 },
   'claude-3-haiku-20240307': { input: 0.25, output: 1.25 },
-  'claude-3-5-sonnet-20241022': { input: 3.00, output: 15.00 },
+  'claude-3-5-sonnet-20241022': { input: 3.0, output: 15.0 },
 };
 
 class LLMService {
@@ -47,7 +47,11 @@ class LLMService {
   /**
    * Calculate cost for a given model and token usage
    */
-  private calculateCost(model: string, inputTokens: number, outputTokens: number): number {
+  private calculateCost(
+    model: string,
+    inputTokens: number,
+    outputTokens: number
+  ): number {
     const pricing = ANTHROPIC_PRICING[model as keyof typeof ANTHROPIC_PRICING];
     if (!pricing) {
       logger.warn(`Unknown model pricing: ${model}`);
@@ -56,14 +60,18 @@ class LLMService {
 
     const inputCost = (inputTokens / 1000000) * pricing.input;
     const outputCost = (outputTokens / 1000000) * pricing.output;
-    
+
     return parseFloat((inputCost + outputCost).toFixed(6));
   }
 
   /**
    * Create a new conversation
    */
-  async createConversation(userId: string, title?: string, model: string = 'claude-3-sonnet-20240229') {
+  async createConversation(
+    userId: string,
+    title?: string,
+    model: string = 'claude-3-sonnet-20240229'
+  ) {
     try {
       const conversation = await db.prisma.lLMConversation.create({
         data: {
@@ -89,7 +97,11 @@ class LLMService {
   /**
    * Get user conversations
    */
-  async getUserConversations(userId: string, limit: number = 50, offset: number = 0) {
+  async getUserConversations(
+    userId: string,
+    limit: number = 50,
+    offset: number = 0
+  ) {
     try {
       const conversations = await db.prisma.lLMConversation.findMany({
         where: { userId },
@@ -196,7 +208,9 @@ class LLMService {
         model: conversation.model,
         max_tokens: options.maxTokens || 2048,
         temperature: options.temperature || 0.7,
-        system: options.systemPrompt || 'You are a helpful AI assistant for developers.',
+        system:
+          options.systemPrompt ||
+          'You are a helpful AI assistant for developers.',
         messages: messages.map(msg => ({
           role: msg.role,
           content: msg.content,
@@ -212,10 +226,14 @@ class LLMService {
       const inputTokens = response.usage.input_tokens;
       const outputTokens = response.usage.output_tokens;
       const totalTokens = inputTokens + outputTokens;
-      const cost = this.calculateCost(conversation.model, inputTokens, outputTokens);
+      const cost = this.calculateCost(
+        conversation.model,
+        inputTokens,
+        outputTokens
+      );
 
       // Save assistant message
-      const savedMessage = await db.prisma.lLMMessage.create({
+      await db.prisma.lLMMessage.create({
         data: {
           conversationId,
           role: 'assistant',
@@ -255,11 +273,11 @@ class LLMService {
         conversationId,
         userId,
       });
-      
+
       if (error instanceof Error && error.message.includes('not found')) {
         throw error;
       }
-      
+
       throw createError('Failed to send message', 500);
     }
   }
@@ -329,7 +347,9 @@ class LLMService {
         model: conversation.model,
         max_tokens: options.maxTokens || 2048,
         temperature: options.temperature || 0.7,
-        system: options.systemPrompt || 'You are a helpful AI assistant for developers.',
+        system:
+          options.systemPrompt ||
+          'You are a helpful AI assistant for developers.',
         messages: messages.map(msg => ({
           role: msg.role,
           content: msg.content,
@@ -357,7 +377,11 @@ class LLMService {
 
       // Calculate final cost
       const totalTokens = inputTokens + outputTokens;
-      const cost = this.calculateCost(conversation.model, inputTokens, outputTokens);
+      const cost = this.calculateCost(
+        conversation.model,
+        inputTokens,
+        outputTokens
+      );
 
       // Update assistant message with final content
       await db.prisma.lLMMessage.update({
@@ -398,11 +422,11 @@ class LLMService {
         conversationId,
         userId,
       });
-      
+
       if (error instanceof Error && error.message.includes('not found')) {
         throw error;
       }
-      
+
       throw createError('Failed to send streaming message', 500);
     }
   }
@@ -484,7 +508,11 @@ class LLMService {
   /**
    * Update conversation title
    */
-  async updateConversationTitle(conversationId: string, userId: string, title: string) {
+  async updateConversationTitle(
+    conversationId: string,
+    userId: string,
+    title: string
+  ) {
     try {
       const conversation = await db.prisma.lLMConversation.findFirst({
         where: { id: conversationId, userId },

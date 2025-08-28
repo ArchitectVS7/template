@@ -2,14 +2,18 @@ import { Request, Response, NextFunction } from 'express';
 import { logger } from '../utils/logger';
 import { debugLogService } from '../services/debugLog';
 
-export const requestLogger = async (req: Request, res: Response, next: NextFunction) => {
+export const requestLogger = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const startTime = Date.now();
 
   // Capture the original end function
   const originalEnd = res.end;
 
   // Override the end function to log when response is sent
-  res.end = function(...args: unknown[]) {
+  res.end = function (...args: unknown[]) {
     const duration = Date.now() - startTime;
     const statusCode = res.statusCode;
 
@@ -21,26 +25,28 @@ export const requestLogger = async (req: Request, res: Response, next: NextFunct
       duration,
       ip: req.ip,
       userAgent: req.get('User-Agent'),
-      contentLength: res.get('Content-Length')
+      contentLength: res.get('Content-Length'),
     };
 
     // Log to winston
     logger.info('HTTP Request', logData);
 
     // Log to debug system (async, don't wait)
-    debugLogService.logRequest({
-      method: req.method,
-      endpoint: req.url,
-      statusCode,
-      duration,
-      userId: req.user?.id || null,
-      metadata: {
-        ip: req.ip,
-        userAgent: req.get('User-Agent')
-      }
-    }).catch((err: unknown) => {
-      logger.error('Failed to log debug request:', err);
-    });
+    debugLogService
+      .logRequest({
+        method: req.method,
+        endpoint: req.url,
+        statusCode,
+        duration,
+        userId: req.user?.id || null,
+        metadata: {
+          ip: req.ip,
+          userAgent: req.get('User-Agent'),
+        },
+      })
+      .catch((err: unknown) => {
+        logger.error('Failed to log debug request:', err);
+      });
 
     // Call the original end function
     return originalEnd.apply(res, args as Parameters<typeof originalEnd>);

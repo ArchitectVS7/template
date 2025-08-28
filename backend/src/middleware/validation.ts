@@ -17,7 +17,10 @@ export interface ValidationRule {
 /**
  * Generic validation middleware factory
  */
-export const validate = (rules: ValidationRule[], source: 'body' | 'query' | 'params' = 'body') => {
+export const validate = (
+  rules: ValidationRule[],
+  source: 'body' | 'query' | 'params' = 'body'
+) => {
   return (req: Request, res: Response, next: NextFunction) => {
     const data = req[source];
     const errors: Record<string, string> = {};
@@ -27,13 +30,19 @@ export const validate = (rules: ValidationRule[], source: 'body' | 'query' | 'pa
       const fieldName = rule.field;
 
       // Check required fields
-      if (rule.required && (value === undefined || value === null || value === '')) {
+      if (
+        rule.required &&
+        (value === undefined || value === null || value === '')
+      ) {
         errors[fieldName] = `${fieldName} is required`;
         continue;
       }
 
       // Skip validation for optional empty fields
-      if (!rule.required && (value === undefined || value === null || value === '')) {
+      if (
+        !rule.required &&
+        (value === undefined || value === null || value === '')
+      ) {
         continue;
       }
 
@@ -61,7 +70,8 @@ export const validate = (rules: ValidationRule[], source: 'body' | 'query' | 'pa
           case 'email': {
             const emailValidation = AuthService.validateEmail(value);
             if (!emailValidation.valid) {
-              errors[fieldName] = emailValidation.message || `${fieldName} must be a valid email`;
+              errors[fieldName] =
+                emailValidation.message || `${fieldName} must be a valid email`;
               continue;
             }
             break;
@@ -69,7 +79,9 @@ export const validate = (rules: ValidationRule[], source: 'body' | 'query' | 'pa
           case 'password': {
             const passwordValidation = AuthService.validatePassword(value);
             if (!passwordValidation.valid) {
-              errors[fieldName] = passwordValidation.message || `${fieldName} is not strong enough`;
+              errors[fieldName] =
+                passwordValidation.message ||
+                `${fieldName} is not strong enough`;
               continue;
             }
             break;
@@ -80,11 +92,13 @@ export const validate = (rules: ValidationRule[], source: 'body' | 'query' | 'pa
       // String length validation
       if (typeof value === 'string') {
         if (rule.minLength && value.length < rule.minLength) {
-          errors[fieldName] = `${fieldName} must be at least ${rule.minLength} characters long`;
+          errors[fieldName] =
+            `${fieldName} must be at least ${rule.minLength} characters long`;
           continue;
         }
         if (rule.maxLength && value.length > rule.maxLength) {
-          errors[fieldName] = `${fieldName} must not exceed ${rule.maxLength} characters`;
+          errors[fieldName] =
+            `${fieldName} must not exceed ${rule.maxLength} characters`;
           continue;
         }
       }
@@ -102,7 +116,11 @@ export const validate = (rules: ValidationRule[], source: 'body' | 'query' | 'pa
       }
 
       // Pattern validation
-      if (rule.pattern && typeof value === 'string' && !rule.pattern.test(value)) {
+      if (
+        rule.pattern &&
+        typeof value === 'string' &&
+        !rule.pattern.test(value)
+      ) {
         errors[fieldName] = `${fieldName} format is invalid`;
         continue;
       }
@@ -136,14 +154,29 @@ export const validationRules = {
   register: [
     { field: 'email', required: true, type: 'email' as const },
     { field: 'password', required: true, type: 'password' as const },
-    { field: 'firstName', required: false, type: 'string' as const, maxLength: 50 },
-    { field: 'lastName', required: false, type: 'string' as const, maxLength: 50 },
+    {
+      field: 'firstName',
+      required: false,
+      type: 'string' as const,
+      maxLength: 50,
+    },
+    {
+      field: 'lastName',
+      required: false,
+      type: 'string' as const,
+      maxLength: 50,
+    },
   ],
 
   // User login validation
   login: [
     { field: 'email', required: true, type: 'email' as const },
-    { field: 'password', required: true, type: 'string' as const, minLength: 1 },
+    {
+      field: 'password',
+      required: true,
+      type: 'string' as const,
+      minLength: 1,
+    },
   ],
 
   // Password change validation
@@ -154,32 +187,75 @@ export const validationRules = {
 
   // Profile update validation
   updateProfile: [
-    { field: 'firstName', required: false, type: 'string' as const, maxLength: 50 },
-    { field: 'lastName', required: false, type: 'string' as const, maxLength: 50 },
+    {
+      field: 'firstName',
+      required: false,
+      type: 'string' as const,
+      maxLength: 50,
+    },
+    {
+      field: 'lastName',
+      required: false,
+      type: 'string' as const,
+      maxLength: 50,
+    },
     { field: 'email', required: false, type: 'email' as const },
   ],
 
   // Configuration validation
   userConfig: [
     { field: 'key', required: true, type: 'string' as const, maxLength: 100 },
-    { field: 'value', required: true, type: 'string' as const, maxLength: 1000 },
-    { field: 'category', required: false, type: 'string' as const, maxLength: 50 },
+    {
+      field: 'value',
+      required: true,
+      type: 'string' as const,
+      maxLength: 1000,
+    },
+    {
+      field: 'category',
+      required: false,
+      type: 'string' as const,
+      maxLength: 50,
+    },
   ],
 
   // Debug log validation
   debugLog: [
-    { field: 'level', required: true, type: 'string' as const, 
-      custom: (value: unknown) => ['DEBUG', 'INFO', 'WARN', 'ERROR'].includes(value as string) 
-        ? { valid: true } 
-        : { valid: false, message: 'level must be DEBUG, INFO, WARN, or ERROR' }
+    {
+      field: 'level',
+      required: true,
+      type: 'string' as const,
+      custom: (value: unknown) =>
+        ['DEBUG', 'INFO', 'WARN', 'ERROR'].includes(value as string)
+          ? { valid: true }
+          : {
+              valid: false,
+              message: 'level must be DEBUG, INFO, WARN, or ERROR',
+            },
     },
-    { field: 'message', required: true, type: 'string' as const, maxLength: 1000 },
-    { field: 'component', required: false, type: 'string' as const, maxLength: 100 },
+    {
+      field: 'message',
+      required: true,
+      type: 'string' as const,
+      maxLength: 1000,
+    },
+    {
+      field: 'component',
+      required: false,
+      type: 'string' as const,
+      maxLength: 100,
+    },
   ],
 
   // Pagination validation
   pagination: [
-    { field: 'limit', required: false, type: 'number' as const, min: 1, max: 100 },
+    {
+      field: 'limit',
+      required: false,
+      type: 'number' as const,
+      min: 1,
+      max: 100,
+    },
     { field: 'offset', required: false, type: 'number' as const, min: 0 },
   ],
 };
@@ -187,7 +263,11 @@ export const validationRules = {
 /**
  * Sanitize input by removing potentially dangerous characters
  */
-export const sanitizeInput = (req: Request, res: Response, next: NextFunction) => {
+export const sanitizeInput = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const sanitize = (obj: unknown): unknown => {
     if (typeof obj !== 'object' || obj === null) {
       return obj;
@@ -217,14 +297,18 @@ export const sanitizeInput = (req: Request, res: Response, next: NextFunction) =
   req.body = sanitize(req.body);
   // Note: req.query is read-only, so we skip sanitizing it for now
   // In production, consider using a different approach for query sanitization
-  
+
   next();
 };
 
 /**
  * Middleware to validate JSON body exists
  */
-export const requireJsonBody = (req: Request, res: Response, next: NextFunction) => {
+export const requireJsonBody = (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   if (!req.body || Object.keys(req.body).length === 0) {
     return next(createError('Request body is required', 400));
   }

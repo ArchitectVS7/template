@@ -7,7 +7,10 @@ class DatabaseService {
 
   private constructor() {
     this.prisma = new PrismaClient({
-      log: process.env.NODE_ENV === 'development' ? ['query', 'info', 'warn', 'error'] : ['error'],
+      log:
+        process.env.NODE_ENV === 'development'
+          ? ['query', 'info', 'warn', 'error']
+          : ['error'],
     });
   }
 
@@ -38,7 +41,10 @@ class DatabaseService {
     }
   }
 
-  public async healthCheck(): Promise<{ status: string; responseTime: number }> {
+  public async healthCheck(): Promise<{
+    status: string;
+    responseTime: number;
+  }> {
     const startTime = Date.now();
     try {
       await this.prisma.$queryRaw`SELECT 1`;

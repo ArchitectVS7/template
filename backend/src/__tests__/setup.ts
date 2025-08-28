@@ -8,9 +8,9 @@ export const setupPrisma = () => {
   prisma = new PrismaClient({
     datasources: {
       db: {
-        url: process.env.DATABASE_URL || 'file:./test.db'
-      }
-    }
+        url: process.env.DATABASE_URL || 'file:./test.db',
+      },
+    },
   });
   return prisma;
 };

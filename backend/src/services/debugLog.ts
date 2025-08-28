@@ -32,8 +32,8 @@ class DebugLogService {
           statusCode: data.statusCode,
           duration: data.duration,
           userId: data.userId,
-          metadata: data.metadata as Prisma.InputJsonValue
-        }
+          metadata: data.metadata as Prisma.InputJsonValue,
+        },
       });
     } catch (error) {
       logger.error('Failed to log request to database:', error);
@@ -48,23 +48,25 @@ class DebugLogService {
           message: data.message,
           component: data.component,
           userId: data.userId,
-          metadata: data.metadata as Prisma.InputJsonValue
-        }
+          metadata: data.metadata as Prisma.InputJsonValue,
+        },
       });
     } catch (error) {
       logger.error('Failed to log event to database:', error);
     }
   }
 
-  async getLogs(options: {
-    limit?: number;
-    offset?: number;
-    level?: LogLevel;
-    component?: string;
-    userId?: string;
-    startDate?: Date;
-    endDate?: Date;
-  } = {}) {
+  async getLogs(
+    options: {
+      limit?: number;
+      offset?: number;
+      level?: LogLevel;
+      component?: string;
+      userId?: string;
+      startDate?: Date;
+      endDate?: Date;
+    } = {}
+  ) {
     const {
       limit = 100,
       offset = 0,
@@ -72,7 +74,7 @@ class DebugLogService {
       component,
       userId,
       startDate,
-      endDate
+      endDate,
     } = options;
 
     const where: Prisma.DebugLogWhereInput = {};
@@ -97,10 +99,10 @@ class DebugLogService {
             id: true,
             email: true,
             firstName: true,
-            lastName: true
-          }
-        }
-      }
+            lastName: true,
+          },
+        },
+      },
     });
   }
 
@@ -109,55 +111,50 @@ class DebugLogService {
     const timeMap = {
       '1h': new Date(now.getTime() - 60 * 60 * 1000),
       '24h': new Date(now.getTime() - 24 * 60 * 60 * 1000),
-      '7d': new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+      '7d': new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000),
     };
 
     const startTime = timeMap[timeRange];
 
-    const [
-      totalLogs,
-      errorCount,
-      warnCount,
-      componentStats,
-      avgResponseTime
-    ] = await Promise.all([
-      // Total logs
-      db.prisma.debugLog.count({
-        where: { createdAt: { gte: startTime } }
-      }),
-      
-      // Error count
-      db.prisma.debugLog.count({
-        where: {
-          level: LogLevel.ERROR,
-          createdAt: { gte: startTime }
-        }
-      }),
-      
-      // Warning count
-      db.prisma.debugLog.count({
-        where: {
-          level: LogLevel.WARN,
-          createdAt: { gte: startTime }
-        }
-      }),
-      
-      // Component stats
-      db.prisma.debugLog.groupBy({
-        by: ['component'],
-        where: { createdAt: { gte: startTime } },
-        _count: { component: true }
-      }),
-      
-      // Average response time
-      db.prisma.debugLog.aggregate({
-        where: {
-          duration: { not: null },
-          createdAt: { gte: startTime }
-        },
-        _avg: { duration: true }
-      })
-    ]);
+    const [totalLogs, errorCount, warnCount, componentStats, avgResponseTime] =
+      await Promise.all([
+        // Total logs
+        db.prisma.debugLog.count({
+          where: { createdAt: { gte: startTime } },
+        }),
+
+        // Error count
+        db.prisma.debugLog.count({
+          where: {
+            level: LogLevel.ERROR,
+            createdAt: { gte: startTime },
+          },
+        }),
+
+        // Warning count
+        db.prisma.debugLog.count({
+          where: {
+            level: LogLevel.WARN,
+            createdAt: { gte: startTime },
+          },
+        }),
+
+        // Component stats
+        db.prisma.debugLog.groupBy({
+          by: ['component'],
+          where: { createdAt: { gte: startTime } },
+          _count: { component: true },
+        }),
+
+        // Average response time
+        db.prisma.debugLog.aggregate({
+          where: {
+            duration: { not: null },
+            createdAt: { gte: startTime },
+          },
+          _avg: { duration: true },
+        }),
+      ]);
 
     return {
       timeRange,
@@ -165,7 +162,7 @@ class DebugLogService {
       errorCount,
       warnCount,
       componentStats,
-      avgResponseTime: avgResponseTime._avg.duration || 0
+      avgResponseTime: avgResponseTime._avg.duration || 0,
     };
   }
 }

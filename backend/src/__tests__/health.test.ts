@@ -9,9 +9,7 @@ app.use('/api/health', healthRoutes);
 describe('Health Check API', () => {
   describe('GET /api/health', () => {
     it('should return basic health status', async () => {
-      const response = await request(app)
-        .get('/api/health')
-        .expect(200);
+      const response = await request(app).get('/api/health').expect(200);
 
       expect(response.body).toHaveProperty('status');
       expect(response.body).toHaveProperty('timestamp');
@@ -40,7 +38,9 @@ describe('Health Check API', () => {
 
       // Check database information structure
       expect(response.body.checks.database).toHaveProperty('status');
-      expect(response.body.checks.database.status).toMatch(/^(healthy|warning|unhealthy)$/);
+      expect(response.body.checks.database.status).toMatch(
+        /^(healthy|warning|unhealthy)$/
+      );
     });
   });
 });
