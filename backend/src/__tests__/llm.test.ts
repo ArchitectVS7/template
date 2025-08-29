@@ -1,11 +1,29 @@
 import request from 'supertest';
-import { app } from '../index';
-import { db } from '../services/database';
+import { PrismaClient } from '@prisma/client';
+import { createTestApp } from './testApp';
+
+const app = createTestApp();
+
+const prisma = new PrismaClient({
+  datasources: {
+    db: {
+      url: process.env.DATABASE_URL || 'file:./prisma/test-llm.db',
+    },
+  },
+});
 
 describe('LLM API Endpoints', () => {
   let authToken: string;
   let userId: string;
   let conversationId: string;
+
+  beforeAll(async () => {
+    // Clean up any existing data
+    await prisma.session.deleteMany();
+    await prisma.lLMMessage.deleteMany();
+    await prisma.lLMConversation.deleteMany();
+    await prisma.user.deleteMany();
+  });
 
   beforeAll(async () => {
     // Create test user and get auth token
@@ -19,20 +37,25 @@ describe('LLM API Endpoints', () => {
     // Register user
     const registerResponse = await request(app)
       .post('/api/auth/register')
-      .send(testUser);
+      .send(testUser)
+      .expect(201);
 
-    authToken = registerResponse.body.data.accessToken;
-    userId = registerResponse.body.data.user.id;
+    if (registerResponse.body.data?.tokens?.accessToken) {
+      authToken = registerResponse.body.data.tokens.accessToken;
+      userId = registerResponse.body.data.user.id;
+    } else {
+      throw new Error('Failed to get access token from registration response');
+    }
   });
 
   afterAll(async () => {
     // Clean up test data
     if (userId) {
-      await db.prisma.user.delete({
+      await prisma.user.delete({
         where: { id: userId },
-      });
+      }).catch(() => {}); // Ignore errors during cleanup
     }
-    await db.disconnect();
+    await prisma.$disconnect();
   });
 
   describe('POST /api/llm/conversations', () => {

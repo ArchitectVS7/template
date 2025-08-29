@@ -1,4 +1,4 @@
-import { LogLevel, Prisma } from '@prisma/client';
+import { LogLevel } from '@prisma/client';
 import { db } from './database';
 import { logger } from '../utils/logger';
 
@@ -8,7 +8,7 @@ interface LogRequestData {
   statusCode: number;
   duration: number;
   userId?: string | null;
-  metadata?: Prisma.JsonValue;
+  metadata?: Record<string, any>;
 }
 
 interface LogEventData {
@@ -16,7 +16,7 @@ interface LogEventData {
   message: string;
   component?: string;
   userId?: string | null;
-  metadata?: Prisma.JsonValue;
+  metadata?: Record<string, any>;
 }
 
 class DebugLogService {
@@ -32,7 +32,7 @@ class DebugLogService {
           statusCode: data.statusCode,
           duration: data.duration,
           userId: data.userId,
-          metadata: data.metadata as Prisma.InputJsonValue,
+          metadata: data.metadata ? JSON.stringify(data.metadata) : null,
         },
       });
     } catch (error) {
@@ -48,7 +48,7 @@ class DebugLogService {
           message: data.message,
           component: data.component,
           userId: data.userId,
-          metadata: data.metadata as Prisma.InputJsonValue,
+          metadata: data.metadata ? JSON.stringify(data.metadata) : null,
         },
       });
     } catch (error) {
@@ -77,7 +77,7 @@ class DebugLogService {
       endDate,
     } = options;
 
-    const where: Prisma.DebugLogWhereInput = {};
+    const where: any = {};
 
     if (level) where.level = level;
     if (component) where.component = component;

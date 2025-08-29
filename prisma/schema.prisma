@@ -9,7 +9,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -118,7 +118,7 @@ model DebugLog {
   userId    String?
   level     LogLevel
   message   String
-  metadata  Json?
+  metadata  String?
   component String?
   endpoint  String?
   method    String?
@@ -140,7 +140,7 @@ model SystemHealth {
   component   String   // "database", "api", "websocket", etc.
   status      String   // "healthy", "warning", "critical"
   message     String?
-  metadata    Json?
+  metadata    String?
   responseTime Int?    // in milliseconds
   createdAt   DateTime @default(now())
 

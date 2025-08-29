@@ -1,10 +1,7 @@
 import request from 'supertest';
-import express from 'express';
-import { healthRoutes } from '../routes/health';
+import { createTestApp } from './testApp';
 
-const app = express();
-app.use(express.json());
-app.use('/api/health', healthRoutes);
+const app = createTestApp();
 
 describe('Health Check API', () => {
   describe('GET /api/health', () => {

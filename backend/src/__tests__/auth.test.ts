@@ -1,24 +1,26 @@
 import request from 'supertest';
-import express from 'express';
 import bcrypt from 'bcryptjs';
 import { PrismaClient } from '@prisma/client';
-import { authRoutes } from '../routes/auth';
-import { errorHandler } from '../middleware/errorHandler';
+import { createTestApp } from './testApp';
 
-const app = express();
-app.use(express.json());
-app.use('/api/auth', authRoutes);
-app.use(errorHandler);
+const app = createTestApp();
 
 const prisma = new PrismaClient({
   datasources: {
     db: {
-      url: 'file:./test.db',
+      url: process.env.DATABASE_URL || 'file:./prisma/test-auth.db',
     },
   },
 });
 
 describe('Authentication API', () => {
+  beforeAll(async () => {
+    // Clean up test data before all tests
+    await prisma.session.deleteMany();
+    await prisma.debugLog.deleteMany();
+    await prisma.user.deleteMany();
+  });
+
   beforeEach(async () => {
     // Clean up test data before each test
     await prisma.session.deleteMany();

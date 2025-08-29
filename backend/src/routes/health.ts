@@ -37,11 +37,11 @@ router.get('/', async (req: Request, res: Response) => {
           status: health.status,
           message: `Health check completed`,
           responseTime: totalTime,
-          metadata: {
+          metadata: JSON.stringify({
             database: dbHealth,
             memory: JSON.parse(JSON.stringify(health.memory)),
             uptime: health.uptime,
-          },
+          }),
         },
       })
       .catch((err: unknown) => {

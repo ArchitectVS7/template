@@ -21,11 +21,13 @@ module.exports = {
     'lcov',
     'html'
   ],
-  // setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup.ts'],
+  setupFilesAfterEnv: ['<rootDir>/src/__tests__/setup.ts'],
   testTimeout: 30000,
   clearMocks: true,
   resetMocks: true,
   restoreMocks: true,
+  maxWorkers: 1,  // Run tests sequentially to avoid database conflicts
+  forceExit: true,
   // Environment variables for testing
   setupFiles: ['<rootDir>/src/__tests__/env.ts']
 };
